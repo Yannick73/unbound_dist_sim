@@ -6,7 +6,7 @@ output:
 ```{r}
 library(bayesfam)
 # global RMD settings
-x <- seq(from=-8, to=8, length.out=1000)
+x <- seq(from=-15, to=15, length.out=1000)
 col1 <- 'red'
 col2 <- 'yellow'
 col3 <- 'blue'
@@ -21,14 +21,18 @@ plot(x, dnorm(x, normal_narrow[1], normal_narrow[2]), type='l', col=col1,
 lines(x, dnorm(x, normal_broad[1], normal_broad[2]), type='l', col=col2)
 ```
 ```{r}
-t_highTail <- c(0, 1)
-t_lowTail <- c(0, 10)
+t_highTail <- c(0, 1, 1)
+t_lowTail <- c(0, 10, 1)
 t_skewed <- c(5, 10)
 # usually, mu then shape. In dt, it is reversed.
-plot(x, dt(x, t_lowTail[2], t_lowTail[1]), type='l', col=col2, 
-      ylab='different qualitative student-t PDFs')
-lines(x, dt(x, t_highTail[2], t_highTail[1]), type='l', col=col1)
-lines(x, dt(x+5.5, t_skewed[2], t_skewed[1]), type='l', col=col3)
+plot(x, brms::dstudent_t(x, t_lowTail[2], t_lowTail[1], t_lowTail[3]), type='l', 
+     col=col2, ylab='different qualitative student-t PDFs')
+lines(x, brms::dstudent_t(x, t_highTail[2], t_highTail[1], t_highTail[3]), 
+      type='l', col=col1)
+lines(x, brms::dstudent_t(x, t_skewed[2], t_skewed[1]), 
+      type='l', col=col3)
+# BRMS' version works not quite the same as the same, as vanilla student
+# vanilla gets skewed for mu != 0, BRMS' does not skew
 ```
 ```{r}
 sn_left <- c(0, 1, 10)
@@ -80,5 +84,16 @@ gumbel_broad <- c(0, 1.5)
 plot(x, dgumbel_mean(x+0.5, gumbel_narrow[1], gumbel_narrow[2]), type='l', col=col1,
      ylab='different qualitative gumbel PDFs')
 lines(x, dnorm(x, gumbel_broad[1], gumbel_broad[2]), type='l', col=col2)
+```
+```{r}
+sln_skewed_bm <- c(1.5, 1)  # mode bigger, mode != 0
+sln_skewed_em <- c(1, 1)    # skewed, mode = 0
+sln_sym <- c(0, 1)
+plot(x, dsymlognormal(x, mu = sln_sym[1], sigma = sln_sym[2]), 
+      type = "l", col = col3, ylab='different qualitative symlognormal PDFs')
+lines(x, dsymlognormal(x, mu = sln_skewed_bm[1], sigma = sln_skewed_bm[2]), 
+     type = "l", col = col1)
+lines(x, dsymlognormal(x, mu = sln_skewed_em[1], sigma = sln_skewed_em[2]), 
+      type = "l", col = col2)
 ```
 
