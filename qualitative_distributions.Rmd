@@ -23,14 +23,11 @@ lines(x, dnorm(x, normal_broad[1], normal_broad[2]), type='l', col=col2)
 ```{r}
 t_highTail <- c(0, 1, 1)
 t_lowTail <- c(0, 10, 1)
-t_skewed <- c(5, 10)
 # usually, mu then shape. In dt, it is reversed.
 plot(x, brms::dstudent_t(x, t_lowTail[2], t_lowTail[1], t_lowTail[3]), type='l', 
      col=col2, ylab='different qualitative student-t PDFs')
 lines(x, brms::dstudent_t(x, t_highTail[2], t_highTail[1], t_highTail[3]), 
       type='l', col=col1)
-lines(x, brms::dstudent_t(x, t_skewed[2], t_skewed[1]), 
-      type='l', col=col3)
 # BRMS' version works not quite the same as the same, as vanilla student
 # vanilla gets skewed for mu != 0, BRMS' does not skew
 ```
