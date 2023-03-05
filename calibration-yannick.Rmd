@@ -103,159 +103,6 @@ p1 <- plot_dist(
 p1
 ```
 
-<!-- ## Weibull -->
-
-<!-- ```{r} -->
-<!-- p2 <- plot_dist( -->
-<!--   dist = "weibull_median", -->
-<!--   bounds = c(0.00001, 20), -->
-<!--   parnames = c("mu", "k"), -->
-<!--   package = "bayesim", -->
-<!--   pars = list( -->
-<!--     c(1, 1), -->
-<!--     c(10, 4), -->
-<!--     c(10, 8) -->
-<!--     ), -->
-<!--   user_theme = partial(theme_tufte, base_family = "") -->
-<!--   ) + -->
-<!--   ggtitle("Weibull") + -->
-<!--   guides(color = "none") + -->
-<!--   coord_cartesian(ylim = c(0, 0.4)) + -->
-<!--   geom_vline(xintercept = 0, linetype = "dotted", color = "grey") -->
-<!-- p2 -->
-<!-- ``` -->
-
-<!-- ## Lognormal -->
-
-<!-- ```{r} -->
-<!-- p3 <- plot_dist( -->
-<!--   dist = "lognormal", -->
-<!--   bounds = c(0.00001, 20), -->
-<!--   parnames = c("mu", "sigma"), -->
-<!--   package = "bayesim", -->
-<!--   pars = list( -->
-<!--     c(log(1), 1), -->
-<!--     c(log(10), 0.35), -->
-<!--     c(log(10), 0.15) -->
-<!--     ), -->
-<!--   user_theme = partial(theme_tufte, base_family = "") -->
-<!--   ) + -->
-<!--   ggtitle("Log-Normal") + -->
-<!--   guides(color = "none") + -->
-<!--   coord_cartesian(ylim = c(0, 0.4)) + -->
-<!--   geom_vline(xintercept = 0, linetype = "dotted", color = "grey") -->
-<!-- p3 -->
-<!-- ``` -->
-
-<!-- ## Softplusnormal -->
-
-<!-- ```{r} -->
-<!-- p4 <- plot_dist( -->
-<!--   dist = "softplusnormal", -->
-<!--   bounds = c(0.00001, 20), -->
-<!--   parnames = c("mu", "sigma"), -->
-<!--   package = "bayesim", -->
-<!--   pars = list( -->
-<!--     c(softplus(1), 2), -->
-<!--     c(softplus(10), 4), -->
-<!--     c(softplus(10), 2) -->
-<!--     ), -->
-<!--   user_theme = partial(theme_tufte, base_family = "") -->
-<!--   ) + -->
-<!--   ggtitle("Softplus-Normal") + -->
-<!--   guides(color = "none") + -->
-<!--   coord_cartesian(ylim = c(0, 0.4)) + -->
-<!--   geom_vline(xintercept = 0, linetype = "dotted", color = "grey") -->
-<!-- p4 -->
-<!-- ``` -->
-
-<!-- ## Frechet -->
-
-<!-- ```{r} -->
-<!-- p5 <- plot_dist( -->
-<!--   dist = "frechet_median", -->
-<!--   bounds = c(0.0001, 20), -->
-<!--   parnames = c("mu", "nu"), -->
-<!--   package = "bayesim", -->
-<!--   pars = list( -->
-<!--     c(1, 2), -->
-<!--     c(10, 5), -->
-<!--     c(10, 10) -->
-<!--     ), -->
-<!--   user_theme = partial(theme_tufte, base_family = "") -->
-<!--   ) + -->
-<!--   ggtitle("Fréchet") + -->
-<!--   guides(color = "none") + -->
-<!--   coord_cartesian(ylim = c(0, 0.4)) + -->
-<!--   geom_vline(xintercept = 0, linetype = "dotted", color = "grey") -->
-<!-- p5 -->
-<!-- ``` -->
-
-<!-- ## Inverse Gaussian -->
-
-<!-- ```{r} -->
-<!-- p6 <- plot_dist( -->
-<!--   dist = "inv_gaussian", -->
-<!--   bounds = c(0.0001, 20), -->
-<!--   parnames = c("mu", "shape"), -->
-<!--   package = "brms", -->
-<!--   pars = list( -->
-<!--     c(1, 1), -->
-<!--     c(10, 10), -->
-<!--     c(10, 100) -->
-<!--     ), -->
-<!--   user_theme = partial(theme_tufte, base_family = "") -->
-<!--   ) + -->
-<!--   ggtitle("Inverse Gaussian") + -->
-<!--   guides(color = "none") + -->
-<!--   coord_cartesian(ylim = c(0, 0.4)) + -->
-<!--   geom_vline(xintercept = 0, linetype = "dotted", color = "grey") -->
-<!-- p6 -->
-<!-- ``` -->
-
-<!-- ## Beta Prime -->
-
-<!-- ```{r} -->
-<!-- p7 <- plot_dist( -->
-<!--   dist = "betaprime", -->
-<!--   bounds = c(0.0001, 20), -->
-<!--   parnames = c("mu", "phi"), -->
-<!--   package = "bayesim", -->
-<!--   pars = list( -->
-<!--     c(1, 1), -->
-<!--     c(10, 20), -->
-<!--     c(10, 50) -->
-<!--     ), -->
-<!--   user_theme = partial(theme_tufte, base_family = "") -->
-<!--   ) + -->
-<!--   ggtitle("Beta prime") + -->
-<!--   guides(color = "none") + -->
-<!--   coord_cartesian(ylim = c(0, 0.4)) + -->
-<!--   geom_vline(xintercept = 0, linetype = "dotted", color = "grey") -->
-<!-- p7 -->
-<!-- ``` -->
-
-<!-- ##Gompertz -->
-
-<!-- ```{r} -->
-<!-- p8 <- plot_dist( -->
-<!--   dist = "gompertz", -->
-<!--   bounds = c(0.00001, 20), -->
-<!--   parnames = c("mu", "eta"), -->
-<!--   package = "bayesim", -->
-<!--   pars = list( -->
-<!--     c(1, 0.2), -->
-<!--     c(10, 0.3), -->
-<!--     c(10, 0.6) -->
-<!--     ), -->
-<!--   user_theme = partial(theme_tufte, base_family = "") -->
-<!--   ) + -->
-<!--   ggtitle("Gompertz") + -->
-<!--   guides(color = "none") + -->
-<!--   coord_cartesian(ylim = c(0, 0.4)) + -->
-<!--   geom_vline(xintercept = 0, linetype = "dotted", color = "grey") -->
-<!-- p8 -->
-<!-- ``` -->
 
 <!-- ## Combined -->
 
@@ -288,35 +135,38 @@ stan_pars <- list(
 )
 
 metrics <- c(
-  "v_mean",
-  "v_sd",
-  "v_median",
-  "v_mad",
+  # "v_mean",
+  # "v_sd",
+  # "v_median",
+  # "v_mad",
   "v_pos_prob",
   "v_quantiles",
-  "v_bias",
-  "v_rmse",
-  "v_mae",
-  "v_mse",
+  # "v_bias",
+  # "v_rmse",
+  # "v_mae",
+  # "v_mse",
   "v_true_percentile",
   "divergent_transitions_rel",
-  "bad_pareto_ks",
-  "time_per_sample",
+  # "bad_pareto_ks",
+  # "time_per_sample",
   "rhat",
   "ess_bulk",
   "ess_tail",
-  "elpd_loo",
-  "elpd_test",
-  "rmse_loo",
-  "rmse_test",
-  "r2_loo",
-  "r2_test",
+  # "elpd_loo",
+  # "elpd_test",
+  # "rmse_loo",
+  # "rmse_test",
+  # "r2_loo",
+  # "r2_test",
   "data_gen",
-  "fit_gen"
+  "fit_gen",
+  "pq",
+  "q_true"
 )
 
 VARS_OF_INTEREST = list(list(c("b_x")))
-QUANTILES = list(list(seq(0.1, 0.9, length.out = 9)))
+#QUANTILES = list(list(seq(0.1, 0.9, length.out = 9)))
+QUANTILES = list(list(c(0.025, 0.975)))
 ```
 
 # Data Gen Setup
@@ -337,9 +187,9 @@ data_generation_configuration <- expand.grid(
   data_N = 100,
   dataset_N = DATASET_N,
   data_family = c(
-    "gaussian",
-    "gumbel",
-    "symlognormal"
+    "gaussian"#,
+    # "gumbel",
+    # "symlognormal"
   ),
   data_link = c(
     "identity"
@@ -399,9 +249,9 @@ data_generation_configuration$id <- as.numeric(
 ```{r}
 fit_configuration <- expand.grid(
   fit_family = c(
-     "gaussian",
-     "gumbel",
-     "symlognormal"
+     "gaussian"#,
+     # "gumbel",
+     # "symlognormal"
   ),
   fit_link = c(
     "identity"
@@ -442,7 +292,7 @@ end_time <- Sys.time()
 print(end_time - start_time)
 ```
 ```{r}
-cols <- c("formula", "data_family_transformed", "data_link_transformed", "shape", "zero_effect")
+cols <- c("formula", "data_family", "shape", "zero_effect")
 
 p1 <- result_df %>%
   filter(data_family == fit_family) %>%
@@ -450,15 +300,15 @@ p1 <- result_df %>%
   filter(rhat_b_x <= 1.01) %>%
   filter(ess_bulk_b_x > 400) %>%
   filter(ess_tail_b_x > 400) %>%
-  mutate(sig95 = as.numeric(pq_0.025 > 0 | pq_0.975 < 0),
+  mutate(sig95 = as.numeric(b_x_2_5pq > 0 | b_x_97_5pq < 0),
          zero_effect = ifelse(x_y_coef != 0, "FPR", "Power")) %>%
   group_by(across(all_of(cols))) %>%
   summarise(sig95 = mean(1 - sig95)) %>%
   ggplot() +
-  geom_bar(aes(data_family_transformed, x = sig95), stat = "identity") +
+  geom_bar(aes(data_family, x = sig95), stat = "identity") +
   geom_vline(xintercept = 0.05) +
   geom_vline(xintercept = 0.95) +
-  facet_grid(zero_effect + shape ~ formula + data_link_transformed) +
+  facet_grid(zero_effect + shape ~ formula) +
   ggtitle("95% CI coverage of true x_y_coef") +
   ylab("Formula") +
   xlab("CI Calibration")
