@@ -347,8 +347,8 @@ data_generation_configuration <- expand.grid(
   lb = -Inf,
   ub = Inf,
   resample = 1.3,
-  x_y_coef = c(0),
-  y_intercept = 0.5,
+  x_y_coef = c(NA, 0),
+  y_intercept = NA,
   sigma_y = NA,
   shape = c(
     "thin",
@@ -374,30 +374,19 @@ sigma_y_list <- list(
   "gumbel" = c(1, 2, 4),
   "symlognormal" = c(1, 2, 4) 
 )
+y_intercept_list <- c(1, 5, 10)
+x_y_coef_list <- c(0.5, 1, 2)
+shape_index_lookup <- list("thin" = 1, "wide" = 2, "skewed" = 3)
 
 for (i in seq_len(nrow(data_generation_configuration))) {
   family <- data_generation_configuration$data_family[[i]]
-  shape <- data_generation_configuration$shape[[i]]
-  #switch(family,
-  #  "lognormal" = link <- "log",
-  #  "softplusnormal" = link <- "softplus",
-  #  link <- data_generation_configuration$data_link[[i]]
-  #)
-  #data_generation_configuration$z1_x_coef[[i]] <- z1_x_coef_list[[link]]
-  #data_generation_configuration$z1_y_coef[[i]] <- z1_y_coef_list[[link]]
-  #data_generation_configuration$x_z4_coef[[i]] <- x_z4_coef_list[[link]]
-  #data_generation_configuration$y_z4_coef[[i]] <- y_z4_coef_list[[link]]
-  #if (is.na(data_generation_configuration$x_y_coef[[i]])) {
-  #  data_generation_configuration$x_y_coef[[i]] <- x_y_coef_list[[link]][[shape]]
-  #}
-  if (shape == "thin") {
-    data_generation_configuration$sigma_y[[i]] <- sigma_y_list[[family]][[1]]
-  }
-  if (shape == "wide") {
-    data_generation_configuration$sigma_y[[i]] <- sigma_y_list[[family]][[2]]
-  }
-  if (shape == "skewed") {
-    data_generation_configuration$sigma_y[[i]] <- sigma_y_list[[family]][[3]]
+  shape_name <- data_generation_configuration$shape[[i]]
+  shape_index <- shape_index_lookup[[shape_name]]
+  
+  data_generation_configuration$sigma_y[[i]] <- sigma_y_list[[family]][[shape_index]]
+  data_generation_configuration$y_intercept[[i]] <- y_intercept_list[[shape_index]]
+  if(is.na(data_generation_configuration$x_y_coef[[i]])) {
+    data_generation_configuration$x_y_coef[[i]] <- x_y_coef_list[[shape_index]]
   }
 }
 data_generation_configuration$id <- as.numeric(
@@ -452,3 +441,37 @@ result_df <- full_simulation(
 end_time <- Sys.time()
 print(end_time - start_time)
 ```
+```{r}
+cols <- c("formula", "data_family_transformed", "data_link_transformed", "shape", "zero_effect")
+
+p1 <- result_df %>%
+  filter(data_family == fit_family) %>%
+  filter(divergent_transitions_rel == 0) %>%
+  filter(rhat_b_x <= 1.01) %>%
+  filter(ess_bulk_b_x > 400) %>%
+  filter(ess_tail_b_x > 400) %>%
+  mutate(sig95 = as.numeric(pq_0.025 > 0 | pq_0.975 < 0),
+         zero_effect = ifelse(x_y_coef != 0, "FPR", "Power")) %>%
+  group_by(across(all_of(cols))) %>%
+  summarise(sig95 = mean(1 - sig95)) %>%
+  ggplot() +
+  geom_bar(aes(data_family_transformed, x = sig95), stat = "identity") +
+  geom_vline(xintercept = 0.05) +
+  geom_vline(xintercept = 0.95) +
+  facet_grid(zero_effect + shape ~ formula + data_link_transformed) +
+  ggtitle("95% CI coverage of true x_y_coef") +
+  ylab("Formula") +
+  xlab("CI Calibration")
+
+p1
+```
+
+Explanation:
+- If the true effect (x_y_coef) = 0, having no 0 in the CI (sig95) is a false positive (or alpha error)
+- If the true effect (x_y_coef) != 0, having no 0 in the CI (sig95) is a true positive (or power)
+- As we use 95% CIs, we would like the alpha error to be 5% and the power to be 95%. This won't perfectly work but we try to kinda get there.
+- As this can only be fairly measured, we only compare models where link and family were the same as the data generating ones)
+- We also know that some formulas are causally misspecified leading to reduced precision and bias.
+- y~x+z1+z2 is the ideal formula. We want our parameters to be such that we get the 5% FPR (false positive rate) and 95% power
+- y~x + z1 and y~ x+ z1 + z2 + z3 are unbiased but have less precision. We want them to be close to the 5% and 95% but they should naturally perform slightly worse (ie. higher FPR and lower power) than the ideal formula. No fiddling should be necessary after the ideal formula works.
+- y ~ x + z2 and y ~ x + z1 + z2 + z4 are biased formulas. Here everything goes bad. We want them to show higher FPR than the oder three formulas. This will require fiddling with the related effects of z1 and z4. However we do not want either FPR or power to be 0 or 1, as we loose information about how good/bad we are when running into the boundaries. If in doubt, try aiming for an FPR over 20% and a power over 70% but don't sweat it. 
