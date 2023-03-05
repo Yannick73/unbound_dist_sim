@@ -114,7 +114,7 @@ p1
 # Sim Setup
 
 ```{r}
-RESULT_PATH <- "~/Dokumente/simresults"
+RESULT_PATH <- NULL #"~/Dokumente/simresults"
 NCORES <- 5 # physical cores -1 or less
 CLUSTER_TYPE <- "FORK" # or PSOCK if you have Windows
 SEED <- 1339
@@ -122,7 +122,7 @@ set.seed(SEED)
 options(error = recover) # for easier debugging
 DEBUG <- FALSE # unless you want every single simulation step written to disk
 
-DATASET_N <- 10 # 5-10-ish for calibration, 200 for the final experiment
+DATASET_N <- 20 # 5-10-ish for calibration, 200 for the final experiment
 
 stan_pars <- list(
   backend = "rstan",
@@ -187,8 +187,8 @@ data_generation_configuration <- expand.grid(
   data_N = 100,
   dataset_N = DATASET_N,
   data_family = c(
-    "gaussian"#,
-    # "gumbel",
+    #"gaussian"#,
+    "gumbel"#,
     # "symlognormal"
   ),
   data_link = c(
@@ -202,8 +202,8 @@ data_generation_configuration <- expand.grid(
   sigma_y = NA,
   shape = c(
     "thin",
-    "wide",
-    "skewed"
+    "wide"#,
+    # "skewed"
     ),
   noise_sd = 0.1,
   stringsAsFactors = FALSE
@@ -214,18 +214,21 @@ data_generation_configuration <- filter(
   data_generation_configuration, 
   !((data_family == "gaussian" |
       data_family == "student" |
-      data_family == "generalized_normal"
+      data_family == "generalized_normal" |
+      data_family == "gumbel"   # gumbel does skew, but sigma controls both skew 
+     # and scale. So just use that aspect
   )
    & shape == "skewed")
 )
 
 sigma_y_list <- list(
-  "gaussian" = c(1, 10),
-  "gumbel" = c(1, 2, 4),
+  "gaussian" = c(3, 12), # if equal x_y_coeff, 0 FPR in y ~ x + z1 + z2
+  "gumbel" = c(1.2, 12),
   "symlognormal" = c(1, 2, 4) 
 )
-y_intercept_list <- c(1, 5, 10)
-x_y_coef_list <- c(0.5, 1, 2)
+# Given our aux is usually log, compare to log reference
+y_intercept_list <- c(2, 7, 10)
+x_y_coef_list <- c(0.6, 8, 0.1)
 shape_index_lookup <- list("thin" = 1, "wide" = 2, "skewed" = 3)
 
 for (i in seq_len(nrow(data_generation_configuration))) {
@@ -249,8 +252,8 @@ data_generation_configuration$id <- as.numeric(
 ```{r}
 fit_configuration <- expand.grid(
   fit_family = c(
-     "gaussian"#,
-     # "gumbel",
+     # "gaussian"#,
+     "gumbel"#,
      # "symlognormal"
   ),
   fit_link = c(

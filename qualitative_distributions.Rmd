@@ -13,10 +13,10 @@ col3 <- 'blue'
 print("Showcase of different qualitative continuous unbound distributions")
 ```
 ```{r}
-normal_narrow <- c(0, 2/3)
-normal_broad <- c(0, 3/2)
+normal_unchanged <- c(0, 1)
+normal_broad <- c(0, 5)
 
-plot(x, dnorm(x, normal_narrow[1], normal_narrow[2]), type='l', col=col1,
+plot(x, dnorm(x, normal_unchanged[1], normal_unchanged[2]), type='l', col=col1,
      ylab='different qualitative normal PDFs')
 lines(x, dnorm(x, normal_broad[1], normal_broad[2]), type='l', col=col2)
 ```
@@ -75,10 +75,10 @@ lines(x, brms::dexgaussian(x, mu=exg_heavilySkewed[1], sigma=exg_heavilySkewed[2
                           beta=exg_heavilySkewed[3]), type='l', col=col2)
 ```
 ```{r}
-gumbel_narrow <- c(0, 1)
-gumbel_broad <- c(0, 1.5)
+gumbel_narrow <- c(-1, 1)
+gumbel_broad <- c(0, 2)
 
-plot(x, dgumbel_mean(x+0.5, gumbel_narrow[1], gumbel_narrow[2]), type='l', col=col1,
+plot(x, dgumbel_mean(x, gumbel_narrow[1], gumbel_narrow[2]), type='l', col=col1,
      ylab='different qualitative gumbel PDFs')
 lines(x, dnorm(x, gumbel_broad[1], gumbel_broad[2]), type='l', col=col2)
 ```
