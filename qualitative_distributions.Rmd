@@ -34,63 +34,71 @@ lines(x, brms::dstudent_t(x, t_highTail[2], t_highTail[1], t_highTail[3]),
 ```{r}
 sn_left <- c(0, 1, 10)
 sn_geometric <- c(0, 1, 0)
+sn_wide <- c(0, 5, 0)
 
 plot(x, brms::dskew_normal(x, mu=sn_left[1], sigma=sn_left[2], alpha=sn_left[3]), 
      type='l', col=col1, ylab='different qualitative skew-normal PDFs')
 lines(x, brms::dskew_normal(x, mu=sn_geometric[1], sigma=sn_geometric[2], 
                             alpha=sn_geometric[3]), type='l', col=col2)
+lines(x, brms::dskew_normal(x, mu=sn_wide[1], sigma=sn_wide[2], 
+                            alpha=sn_wide[3]), type='l', col=col3)
 ```
 ```{r}
 gn_normal <- c(0, 1, 2)
-gn_broad <- c(0, 1, 8)
-sn_narrow <- c(0, 1, 1)
+gn_thin <- c(0, 1, 50)
+sn_wide <- c(0, 1, 0.5)
 
 plot(x, dgeneralized_normal(x, mu=gn_normal[1], sigma=gn_normal[2], 
                             beta=gn_normal[3]), type='l', col=col1, 
                             ylab='different qualitative generalized-normal PDFs')
-lines(x, dgeneralized_normal(x, mu=gn_broad[1], sigma=gn_broad[2], 
-                             beta=gn_broad[3]), type='l', col=col2)
-lines(x, dgeneralized_normal(x, mu=sn_narrow[1], sigma=sn_narrow[2], 
-                             beta=sn_narrow[3]), type='l', col=col3)
+lines(x, dgeneralized_normal(x, mu=gn_thin[1], sigma=gn_thin[2], 
+                             beta=gn_thin[3]), type='l', col=col2)
+lines(x, dgeneralized_normal(x, mu=sn_wide[1], sigma=sn_wide[2], 
+                             beta=sn_wide[3]), type='l', col=col3)
 ```
 ```{r}
 al_sym <- c(0, 1, 0.5)
-al_left <- c(-1, 1, 0.25)
-#al_right <- c(0, 1, 0.75)
+al_wide <- c(0, 5, 0.5)
+al_skewed <- c(-1, 1, 0.25)
 
 plot(x, brms::dasym_laplace(x, mu=al_sym[1], sigma=al_sym[2], 
                             quantile=al_sym[3]), type='l', col=col1, 
                             ylab='different qualitative asymmetric-Laplace PDFs')
-lines(x, brms::dasym_laplace(x, mu=al_left[1], sigma=al_left[2], 
-                             quantile=al_left[3]), type='l', col=col2)
+lines(x, brms::dasym_laplace(x, mu=al_skewed[1], sigma=al_skewed[2], 
+                             quantile=al_skewed[3]), type='l', col=col2)
+lines(x, brms::dasym_laplace(x, mu=al_wide[1], sigma=al_wide[2], 
+                             quantile=al_wide[3]), type='l', col=col3)
 ```
 ```{r}
 exg_lightlySkewed <- c(0, 1, 0.1)
 exg_heavilySkewed <- c(0, 1, 2)
+exg_wide <- c(0, 5, 0.1)
 
 plot(x, brms::dexgaussian(x, mu=exg_lightlySkewed[1], sigma=exg_lightlySkewed[2], 
                           beta=exg_lightlySkewed[3]), type='l', col=col1, 
                           ylab='different qualitative ExGauss PDFs')
 lines(x, brms::dexgaussian(x, mu=exg_heavilySkewed[1], sigma=exg_heavilySkewed[2], 
                           beta=exg_heavilySkewed[3]), type='l', col=col2)
+lines(x, brms::dexgaussian(x, mu=exg_wide[1], sigma=exg_wide[2], 
+                          beta=exg_wide[3]), type='l', col=col3)
 ```
 ```{r}
-gumbel_narrow <- c(-1, 1)
-gumbel_broad <- c(0, 2)
+gumbel_skewed <- c(-1, 0.5)
+gumbel_wide <- c(0, 2)
 
-plot(x, dgumbel_mean(x, gumbel_narrow[1], gumbel_narrow[2]), type='l', col=col1,
+plot(x, dgumbel_mean(x, gumbel_skewed[1], gumbel_skewed[2]), type='l', col=col1,
      ylab='different qualitative gumbel PDFs')
-lines(x, dnorm(x, gumbel_broad[1], gumbel_broad[2]), type='l', col=col2)
+lines(x, dnorm(x, gumbel_wide[1], gumbel_wide[2]), type='l', col=col2)
 ```
 ```{r}
-sln_skewed_bm <- c(1.5, 1)  # mode bigger, mode != 0
-sln_skewed_em <- c(1, 1)    # skewed, mode = 0
-sln_sym <- c(0, 1)
-plot(x, dsymlognormal(x, mu = sln_sym[1], sigma = sln_sym[2]), 
+sln_skewed <- c(1.5, 1)  # mode bigger, mode != 0
+sln_wide <- c(0, 3)
+sln_thin <- c(0, 1)
+plot(x, dsymlognormal(x, mu = sln_thin[1], sigma = sln_thin[2]), 
       type = "l", col = col3, ylab='different qualitative symlognormal PDFs')
-lines(x, dsymlognormal(x, mu = sln_skewed_bm[1], sigma = sln_skewed_bm[2]), 
+lines(x, dsymlognormal(x, mu = sln_skewed[1], sigma = sln_skewed[2]), 
      type = "l", col = col1)
-lines(x, dsymlognormal(x, mu = sln_skewed_em[1], sigma = sln_skewed_em[2]), 
+lines(x, dsymlognormal(x, mu = sln_wide[1], sigma = sln_wide[2]),
       type = "l", col = col2)
 ```
 
