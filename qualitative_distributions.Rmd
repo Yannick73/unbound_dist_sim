@@ -83,7 +83,7 @@ lines(x, brms::dexgaussian(x, mu=exg_wide[1], sigma=exg_wide[2],
                           beta=exg_wide[3]), type='l', col=col3)
 ```
 ```{r}
-gumbel_skewed <- c(-1, 0.5)
+gumbel_skewed <- c(-1, 1)
 gumbel_wide <- c(0, 2)
 
 plot(x, dgumbel_mean(x, gumbel_skewed[1], gumbel_skewed[2]), type='l', col=col1,
