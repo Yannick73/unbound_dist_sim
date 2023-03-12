@@ -154,17 +154,17 @@ QUANTILES = list(list(c(0.025, 0.975)))
 
 ```{r}
 data_generation_configuration <- expand.grid(
-  z1_x_coef = 0.4,
-  z1_y_coef = 0.4,
-  z2_y_coef = 0.4,
-  z3_x_coef = 0.5,
-  x_z4_coef = 0.5,
-  y_z4_coef = 0.5,
-  sigma_z1 = 0.6,
-  sigma_z2 = 0.6,
-  sigma_z3 = 0.5,
-  sigma_z4 = 0.5,
-  sigma_x = 0.4,
+  z1_x_coef = 0.3,
+  z1_y_coef = 0.3,
+  z2_y_coef = 0.3,
+  z3_x_coef = 0.6,
+  x_z4_coef = 0.6,
+  y_z4_coef = 0.6,
+  sigma_z1 = 0.8,
+  sigma_z2 = 0.8,
+  sigma_z3 = 0.8,
+  sigma_z4 = 0.8,
+  sigma_x = 0.1,
   data_N = 100,
   dataset_N = DATASET_N,
   data_family = c(
@@ -204,12 +204,12 @@ data_generation_configuration <- filter(data_generation_configuration,
                                         !(data_family == "gumbel" & shape == "thin"))
 
 sigma_y_list <- list(
-  "gaussian" = c(2, 12), # if equal x_y_coeff, 0 FPR in y ~ x + z1 + z2
-  "gumbel" = c(NA, 12, 2), # no thin, form (so NA). skewed - wide
+  "gaussian" = c(1, 12), # if equal x_y_coeff, 0 FPR in y ~ x + z1 + z2
+  "gumbel" = c(NA, 12, 1), # no thin, form (so NA). skewed - wide
   "symlognormal" = c(1, 2, 4) 
 )
 # Given our aux is usually log, compare to log reference
-y_intercept_list <- c(1, 6, 0.5)
+y_intercept_list <- c(2, 6, 2)
 x_y_coef_list <- c(1, 6, 1)
 shape_index_lookup <- list("thin" = 1, "wide" = 2, "skewed" = 3)
 
