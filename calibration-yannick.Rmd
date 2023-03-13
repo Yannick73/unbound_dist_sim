@@ -204,8 +204,8 @@ data_generation_configuration <- filter(data_generation_configuration,
                                         !(data_family == "gumbel" & shape == "thin"))
 
 sigma_y_list <- list(
-  "gaussian" = c(1, 12), # if equal x_y_coeff, 0 FPR in y ~ x + z1 + z2
-  "gumbel" = c(NA, 12, 1), # no thin, form (so NA). skewed - wide
+  "gaussian" = c(1.2, 8), # if equal x_y_coeff, 0 FPR in y ~ x + z1 + z2
+  "gumbel" = c(NA, 8, 1), # no thin, form (so NA). skewed - wide
   "symlognormal" = c(1, 2, 4) 
 )
 # Given our aux is usually log, compare to log reference
