@@ -115,7 +115,7 @@ plot_dist <- function(dist, bounds, pars, prefix = "d", parnames = NULL,
 
 ```{r}
 RESULT_PATH <- NULL #"~/Dokumente/simresults"
-NCORES <- 5 # physical cores -1 or less
+NCORES <- 4 # physical cores -1 or less
 CLUSTER_TYPE <- "FORK" # or PSOCK if you have Windows
 SEED <- 1339
 set.seed(SEED)
@@ -154,23 +154,24 @@ QUANTILES = list(list(c(0.025, 0.975)))
 
 ```{r}
 data_generation_configuration <- expand.grid(
-  z1_x_coef = 0.1,
-  z1_y_coef = 0.1,
-  z2_y_coef = 0.1,
+  z1_x_coef = 2,
+  z1_y_coef = 0.2,
+  z2_y_coef = 0.2,
   z3_x_coef = 0.6,
   x_z4_coef = 0.6,
   y_z4_coef = 0.6,
-  sigma_z1 = 0.8,
-  sigma_z2 = 0.8,
+  sigma_z1 = 0.5,
+  sigma_z2 = 0.5,
   sigma_z3 = 0.5,
   sigma_z4 = 0.5,
-  sigma_x = 0.2,
+  sigma_x = 3,
   data_N = 100,
   dataset_N = DATASET_N,
   data_family = c(
     "gaussian",
     "gumbel",
-    "symlognormal"
+    "symlognormal",
+    "skew_normal"
   ),
   data_link = c(
     "identity"
@@ -180,13 +181,13 @@ data_generation_configuration <- expand.grid(
   resample = 1.3,
   x_y_coef = c(NA, 0),
   y_intercept = NA,
-  sigma_y = NA,
+  sigma_y = list(NA),
   shape = c(
     "thin",
     "wide",
     "skewed"
     ),
-  noise_sd = 0.1,
+  noise_sd = 0.2,
   stringsAsFactors = FALSE
 )
 
@@ -204,13 +205,14 @@ data_generation_configuration <- filter(data_generation_configuration,
                                         !(data_family == "gumbel" & shape == "thin"))
 
 sigma_y_list <- list(
-  "gaussian" = c(1.2, 8), # if equal x_y_coeff, 0 FPR in y ~ x + z1 + z2
-  "gumbel" = c(NA, 8, 1), # no thin, form (so NA). wide - skewed
-  "symlognormal" = c(1, 3, 1.5) 
+  "gaussian" = c(1.2, 10), # if equal x_y_coeff, 0 FPR in y ~ x + z1 + z2
+  "gumbel" = c(NA, 8, 0.5), # no thin, form (so NA). wide - skewed
+  "symlognormal" = c(1, 8, 1.5),
+  "skew_normal" = list(c(1, 0), c(5, 0), c(1, 10))
 )
 # Given our aux is usually log, compare to log reference
-y_intercept_list <- c(0.5, 3, 1)
-x_y_coef_list <- c(0.5, 3, 1)
+y_intercept_list <- c(0.5, 0.5, 5)
+x_y_coef_list <- c(5, 5, 0.5)
 shape_index_lookup <- list("thin" = 1, "wide" = 2, "skewed" = 3)
 
 for (i in seq_len(nrow(data_generation_configuration))) {
@@ -236,7 +238,8 @@ fit_configuration <- expand.grid(
   fit_family = c(
      "gaussian",
      "gumbel",
-     "symlognormal"
+     "symlognormal",
+     "skew_normal"
   ),
   fit_link = c(
     "identity"
@@ -277,6 +280,7 @@ result_df <- full_simulation(
 end_time <- Sys.time()
 print(end_time - start_time)
 ```
+
 ```{r}
 cols <- c("formula", "data_family", "shape", "zero_effect")
 

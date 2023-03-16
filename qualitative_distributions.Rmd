@@ -6,7 +6,7 @@ output:
 ```{r}
 library(bayesfam)
 # global RMD settings
-x <- seq(from=-15, to=15, length.out=1000)
+x <- seq(from=-30, to=30, length.out=1000)
 col1 <- 'red'
 col2 <- 'yellow'
 col3 <- 'blue'
@@ -84,7 +84,7 @@ lines(x, brms::dexgaussian(x, mu=exg_wide[1], sigma=exg_wide[2],
 ```
 ```{r}
 gumbel_skewed <- c(-1, 1)
-gumbel_wide <- c(0, 2)
+gumbel_wide <- c(0, 3)
 
 plot(x, dgumbel_mean(x, gumbel_skewed[1], gumbel_skewed[2]), type='l', col=col1,
      ylab='different qualitative gumbel PDFs')
@@ -92,7 +92,7 @@ lines(x, dnorm(x, gumbel_wide[1], gumbel_wide[2]), type='l', col=col2)
 ```
 ```{r}
 sln_skewed <- c(1.5, 1)  # mode bigger, mode != 0
-sln_wide <- c(0, 3)
+sln_wide <- c(0, 4)
 sln_thin <- c(0, 1)
 plot(x, dsymlognormal(x, mu = sln_thin[1], sigma = sln_thin[2]), 
       type = "l", col = col3, ylab='different qualitative symlognormal PDFs')
