@@ -231,15 +231,15 @@ sigma_y_list <- list(
 # Given our aux is usually log, compare to log reference
 y_intercept_list <- c(0.5, 0.5, -5)
 x_y_coef_list <- list(
-  "gaussian"     = c(0.3, 1.8),
-  "student"      = c(0.2),
-  "skew_normal"  = c(0.3, 1.6, 0.2),
+  "gaussian"     = c(0.5, 2.2),
+  "student"      = c(0.35),
+  "skew_normal"  = c(0.32, 1.67, 0.25),
   #"generalized_normal" = list(c(1, 10), c(1,0.5)),
-  "asym_laplace" = c(0.1, 3.3, 0.8),
-  "exgaussian"   = c(NA,   NA,    0.6),
-  "gumbel"       = c(NA,   3.3,  0.1),
-  "logistic"     = c(0.5, 2.2),
-  "symlognormal" = c(0.27, 2.43, 0.6)
+  "asym_laplace" = c(0.30, 3.4, 1.05),
+  "exgaussian"   = c(NA,  NA,   0.60),
+  "gumbel"       = c(NA,  3.48, 0.15),
+  "logistic"     = c(0.55, 3.2),
+  "symlognormal" = c(0.35, 2.45, 0.6)
 )
 # too much FPR, more xy-coeff
 #x_y_coef_list <- c(0.4, 1.6, 0.4)
