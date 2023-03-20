@@ -168,16 +168,16 @@ QUANTILES = list(list(c(0.025, 0.975)))
 ```{r}
 data_generation_configuration <- expand.grid(
   z1_x_coef = 0.5,
-  z1_y_coef = 2,
-  z2_y_coef = 2,
+  z1_y_coef = 1,
+  z2_y_coef = 1,
   z3_x_coef = 1,
   x_z4_coef = 1,
   y_z4_coef = 1,
-  sigma_z1 = 2,
-  sigma_z2 = 2,
+  sigma_z1 = 1,
+  sigma_z2 = 1,
   sigma_z3 = 1,
   sigma_z4 = 1,
-  sigma_x = 0.5,
+  sigma_x = 0.3,
   data_N = 100,
   dataset_N = DATASET_N,
   data_family = c(
@@ -231,15 +231,16 @@ sigma_y_list <- list(
 # Given our aux is usually log, compare to log reference
 y_intercept_list <- c(0.5, 0.5, -5)
 x_y_coef_list <- list(
-  "gaussian"     = c(0.5, 2.2),
-  "student"      = c(0.38),
-  "skew_normal"  = c(0.32, 1.67, 0.24),
+  "gaussian"     = c(0.41, 2.5),
+  "student"      = c(0.43),
+  "skew_normal"  = c(0.34, 1.6, 0.27),
   #"generalized_normal" = list(c(1, 10), c(1,0.5)),
-  "asym_laplace" = c(0.25, 3.32, 1.00),
-  "exgaussian"   = c(NA,  NA,   0.618),
-  "gumbel"       = c(NA,  3.42, 0.158),
-  "logistic"     = c(0.55, 3.14),
-  "symlognormal" = c(0.35, 2.45, 0.613)
+  "asym_laplace" = c(0.25, 3.2, 1.15),
+  "exgaussian"   = c(NA,  NA,   0.7),
+  "gumbel"       = c(NA,  3.7, 0.165),
+  "logistic"     = c(0.6, 3.4),
+  "symlognormal" = c(0.35, 2.45, 0.6)
+  # sln thin 0.35
 )
 # too much FPR, more xy-coeff
 #x_y_coef_list <- c(0.4, 1.6, 0.4)
@@ -326,7 +327,7 @@ p1 <- result_df %>%
   filter(ess_bulk_b_x > 400) %>%
   filter(ess_tail_b_x > 400) %>%
   mutate(sig95 = as.numeric(b_x_2_5pq > 0 | b_x_97_5pq < 0),
-         zero_effect = ifelse(x_y_coef != 0, "FPR", "Power")) %>%
+         zero_effect = ifelse(x_y_coef == 0, "FPR", "Power")) %>%
   group_by(across(all_of(cols))) %>%
   summarise(sig95 = mean(1 - sig95)) %>%
   ggplot() +
