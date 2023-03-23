@@ -135,7 +135,7 @@ set.seed(SEED)
 options(error = recover) # for easier debugging
 DEBUG <- FALSE # unless you want every single simulation step written to disk
 
-DATASET_N <- 5 # 5-10-ish for calibration, 200 for the final experiment
+DATASET_N <- 20 # 5-10-ish for calibration, 200 for the final experiment
 
 stan_pars <- list(
   backend = "rstan",
@@ -168,16 +168,16 @@ QUANTILES = list(list(c(0.025, 0.975)))
 ```{r}
 data_generation_configuration <- expand.grid(
   z1_x_coef = 0.5,
-  z1_y_coef = 6,
-  z2_y_coef = 6,
+  z1_y_coef = 2,
+  z2_y_coef = 2,
   z3_x_coef = 1,
   x_z4_coef = 1,
   y_z4_coef = 1,
   sigma_z1 = 2,
   sigma_z2 = 2,
   sigma_z3 = 1,
-  sigma_z4 = 1,
-  sigma_x = 0.5,
+  sigma_z4 = 0.5,
+  sigma_x = 1.4,
   data_N = 100,
   dataset_N = DATASET_N,
   data_family = c(
