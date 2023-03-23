@@ -217,6 +217,17 @@ data_generation_configuration <- family_filter(data_generation_configuration, th
 wide_filter <- c("student", "exgaussian")
 data_generation_configuration <- family_filter(data_generation_configuration, wide_filter, "wide")
 
+z1z2_y_list <- list(
+  "gaussian" = list(c(2, 2), c(1, 1)),
+  "student" = list(c(2, 2)),
+  "skew_normal" = list(c(2, 2), c(2, 2), c(4, 4)),
+  "asym_laplace" = list(c(1, 1), c(4, 4), c(4, 4)),
+  "exgaussian" = list(NA, NA, c(4, 4)),
+  "gumbel" = list(NA, c(4, 4), c(1, 1)),
+  "logistic" = list(c(1, 1), c(4, 4)),
+  "symlognormal" = list(c(2, 2), c(2, 2), c(1, 1))
+)
+
 sigma_y_list <- list(
   "gaussian" = c(1.2, 8), # if equal x_y_coeff, 0 FPR in y ~ x + z1 + z2
   "student" = list(c(10, 1)), # student only really does thin
@@ -251,6 +262,9 @@ for (i in seq_len(nrow(data_generation_configuration))) {
   family <- data_generation_configuration$data_family[[i]]
   shape_name <- data_generation_configuration$shape[[i]]
   shape_index <- shape_index_lookup[[shape_name]]
+  
+  data_generation_configuration$z1_y_coef[[i]] <- z1z2_y_list[[family]][[shape_index]][1]
+  data_generation_configuration$z2_y_coef[[i]] <- z1z2_y_list[[family]][[shape_index]][2]
   
   data_generation_configuration$sigma_y[[i]] <- sigma_y_list[[family]][[shape_index]]
   data_generation_configuration$y_intercept[[i]] <- y_intercept_list[[shape_index]]
