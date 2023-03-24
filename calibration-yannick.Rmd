@@ -135,7 +135,7 @@ set.seed(SEED)
 options(error = recover) # for easier debugging
 DEBUG <- FALSE # unless you want every single simulation step written to disk
 
-DATASET_N <- 20 # 5-10-ish for calibration, 200 for the final experiment
+DATASET_N <- 50 # 5-10-ish for calibration, 200 for the final experiment
 
 stan_pars <- list(
   backend = "rstan",
@@ -184,7 +184,7 @@ data_generation_configuration <- expand.grid(
     "gaussian",
     "student",
     "skew_normal",
-    #"generalized_normal",
+    "generalized_normal",
     "asym_laplace",
     "exgaussian",
     "gumbel",
@@ -214,27 +214,29 @@ skew_filter <- c("gaussian", "student", "generalized_normal", "logistic")
 data_generation_configuration <- family_filter(data_generation_configuration, skew_filter, "skewed")
 thin_filter <- c("gumbel", "exgaussian")
 data_generation_configuration <- family_filter(data_generation_configuration, thin_filter, "thin")
-wide_filter <- c("student", "exgaussian")
+wide_filter <- c("exgaussian")#, "student")
 data_generation_configuration <- family_filter(data_generation_configuration, wide_filter, "wide")
 
 z1z2_y_list <- list(
-  "gaussian" = list(c(2, 2), c(1, 1)),
-  "student" = list(c(2, 2)),
-  "skew_normal" = list(c(2, 2), c(2, 2), c(4, 4)),
-  "asym_laplace" = list(c(1, 1), c(4, 4), c(4, 4)),
-  "exgaussian" = list(NA, NA, c(4, 4)),
-  "gumbel" = list(NA, c(4, 4), c(1, 1)),
-  "logistic" = list(c(1, 1), c(4, 4)),
-  "symlognormal" = list(c(2, 2), c(2, 2), c(1, 1))
+  "gaussian" = list(c(6, 6), c(0.3, 0.3)),
+  "student" = list(c(1.5, 1.5), c(1.5, 1.5)),
+  "skew_normal" = list(c(2, 2), c(2, 2), c(24, 24)),
+  "generalized_normal" = list(c(2, 2), c(2, 2)),
+  "asym_laplace" = list(c(0.7, 0.7), c(16, 16), c(3, 3)),
+  "exgaussian" = list(c(20, 20), c(20, 20), c(5, 5)),
+  "gumbel" = list(NA, c(14, 14), c(1.8, 1.8)),
+  "logistic" = list(c(1.2, 1.2), c(16, 16)),
+  "symlognormal" = list(c(3, 3), c(3, 3), c(0.8, 0.8))
 )
 
 sigma_y_list <- list(
   "gaussian" = c(1.2, 8), # if equal x_y_coeff, 0 FPR in y ~ x + z1 + z2
-  "student" = list(c(10, 1)), # student only really does thin
+  "student" = list(c(1, 1), c(10, 1)), # student only really does thin
   "skew_normal" = list(c(1, 0), c(5, 0), c(1, 8)),
-  #"generalized_normal" = list(c(1, 10), c(1,0.5)),
+  "generalized_normal" = list(c(1, 2), c(1, 0.7)), # 0.7 is not as wide as possible
+  # but anything below 0.7 has trouble with divergent chains
   "asym_laplace" = list(c(0.3, 0.5), c(5, 0.5), c(0.6, 0.1)),
-  "exgaussian" = list(NA, NA, c(1, 2)),
+  "exgaussian" = list(c(1, 0.1), c(5, 0.1), c(1, 2)),
   "gumbel" = c(NA, 12, 0.5), # no thin, form (so NA). wide - skewed
   "logistic" = c(1, 5),
   "symlognormal" = c(1, 8, 1.5)
@@ -244,11 +246,11 @@ sigma_y_list <- list(
 y_intercept_list <- c(0, 0, -5)
 x_y_coef_list <- list(
   "gaussian"     = c(0.8, 0.5),
-  "student"      = c(0.43),
+  "student"      = c(0.43, 0.43),
   "skew_normal"  = c(0.34, 1.6, 0.27),
-  #"generalized_normal" = list(c(1, 10), c(1,0.5)),
+  "generalized_normal" = c(0.8, 0.5),
   "asym_laplace" = c(0.25, 3.2, 1.15),
-  "exgaussian"   = c(NA,  NA,   0.7),
+  "exgaussian"   = c(0.7,  0.7,   0.7),
   "gumbel"       = c(NA,  3.7, 0.165),
   "logistic"     = c(0.6, 3.4),
   "symlognormal" = c(0.35, 2.45, 0.6)
@@ -285,7 +287,7 @@ fit_configuration <- expand.grid(
     "gaussian",
     "student",
     "skew_normal",
-    #"generalized_normal",
+    "generalized_normal",
     "asym_laplace",
     "exgaussian",
     "gumbel",
