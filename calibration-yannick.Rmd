@@ -218,15 +218,15 @@ wide_filter <- c("exgaussian")#, "student")
 data_generation_configuration <- family_filter(data_generation_configuration, wide_filter, "wide")
 
 z1z2_y_list <- list(
-  "gaussian" = list(c(6, 6), c(0.3, 0.3)),
+  "gaussian" = list(c(4, 4), c(0.3, 0.3)),
   "student" = list(c(1.5, 1.5), c(1.5, 1.5)),
-  "skew_normal" = list(c(2, 2), c(2, 2), c(24, 24)),
-  "generalized_normal" = list(c(2, 2), c(2, 2)),
-  "asym_laplace" = list(c(0.7, 0.7), c(16, 16), c(3, 3)),
-  "exgaussian" = list(c(20, 20), c(20, 20), c(5, 5)),
+  "skew_normal" = list(c(0.8, 0.8), c(2, 2), c(24, 24)),
+  "generalized_normal" = list(c(1.5, 1.5), c(1.2, 1.2)),
+  "asym_laplace" = list(c(0.4, 0.4), c(20, 20), c(5, 5)),
+  "exgaussian" = list(c(20, 20), c(20, 20), c(3.5, 3.5)),
   "gumbel" = list(NA, c(14, 14), c(1.8, 1.8)),
-  "logistic" = list(c(1.2, 1.2), c(16, 16)),
-  "symlognormal" = list(c(3, 3), c(3, 3), c(0.8, 0.8))
+  "logistic" = list(c(3, 3), c(12, 12)),
+  "symlognormal" = list(c(3.3, 3.3), c(4, 4), c(0.8, 0.8))
 )
 
 sigma_y_list <- list(
@@ -285,14 +285,14 @@ data_generation_configuration$id <- as.numeric(
 fit_configuration <- expand.grid(
   fit_family = c(
     "gaussian",
-    "student",
+    #"student",
     "skew_normal",
     "generalized_normal",
     "asym_laplace",
     "exgaussian",
     "gumbel",
     "logistic",
-    "symlognormal"
+    #"symlognormal"
   ),
   fit_link = c(
     "identity"
