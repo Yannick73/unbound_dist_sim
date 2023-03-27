@@ -21,8 +21,8 @@ plot(x, dnorm(x, normal_unchanged[1], normal_unchanged[2]), type='l', col=col1,
 lines(x, dnorm(x, normal_broad[1], normal_broad[2]), type='l', col=col2)
 ```
 ```{r}
-t_wide <- c(0, 1, 1)
-t_thin <- c(0, 10, 1)
+t_wide <- c(0, 2, 5)
+t_thin <- c(0, 2, 1)
 # usually, mu then shape. In dt, it is reversed.
 plot(x, brms::dstudent_t(x, t_thin[2], t_thin[1], t_thin[3]), type='l', 
      col=col2, ylab='different qualitative student-t PDFs')
@@ -58,7 +58,7 @@ lines(x, dgeneralized_normal(x, mu=sn_wide[1], sigma=sn_wide[2],
 ```
 ```{r}
 al_thin <- c(0, 0.5, 0.5)
-al_wide <- c(0, 5, 0.5)
+al_wide <- c(0, 2, 0.5)
 al_skewed <- c(-1, 0.2, 0.1)
 
 plot(x, brms::dasym_laplace(x, mu=al_thin[1], sigma=al_thin[2], 
@@ -84,7 +84,7 @@ lines(x, brms::dexgaussian(x, mu=exg_wide[1], sigma=exg_wide[2],
 ```
 ```{r}
 gumbel_skewed <- c(-1, 1)
-gumbel_wide <- c(0, 3)
+gumbel_wide <- c(0, 4)
 
 plot(x, dgumbel_mean(x, gumbel_skewed[1], gumbel_skewed[2]), type='l', col=col1,
      ylab='different qualitative gumbel PDFs')
@@ -92,7 +92,7 @@ lines(x, dnorm(x, gumbel_wide[1], gumbel_wide[2]), type='l', col=col2)
 ```
 ```{r}
 logistic_thin <- c(0, 1)
-logistic_wide <- c(0, 5)
+logistic_wide <- c(0, 4)
 plot(x, dlogistic(x, mu = logistic_thin[1], sigma = logistic_thin[2]), 
       type = "l", col = col1, ylab='different qualitative logistic PDFs')
 lines(x, dlogistic(x, mu = logistic_wide[1], sigma = logistic_wide[2]), 
