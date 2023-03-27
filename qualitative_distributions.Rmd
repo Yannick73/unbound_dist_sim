@@ -13,7 +13,7 @@ col3 <- 'blue'
 print("Showcase of different qualitative continuous unbound distributions")
 ```
 ```{r}
-normal_unchanged <- c(0, 1)
+normal_unchanged <- c(0, 1.2)
 normal_broad <- c(0, 5)
 
 plot(x, dnorm(x, normal_unchanged[1], normal_unchanged[2]), type='l', col=col1,
