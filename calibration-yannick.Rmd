@@ -202,9 +202,9 @@ data_generation_configuration <- expand.grid(
   y_intercept = NA,
   sigma_y = list(NA),
   shape = c(
-    #"thin",
-    "wide"#,
-    # "skewed"
+    "thin",
+    "wide",
+    "skewed"
     ),
   noise_sd = 0.2, # not used in normal basedag
   stringsAsFactors = FALSE
@@ -220,7 +220,7 @@ data_generation_configuration <- family_filter(data_generation_configuration, wi
 z1z2_y_list <- list(
   "gaussian" = list(c(15, 15), c(25, 25)),
   "student" = list(c(0.5, 0.5), c(2, 2)),
-  "skew_normal" = list(c(0.1, 0.1), c(0.3, 0.3), c(5, 5)),
+  "skew_normal" = list(c(1.2, 1.2), c(0.5, 0.5), c(1, 1)),
   "generalized_normal" = list(c(8, 8), c(1.2, 1.2)),
   "asym_laplace" = list(c(0.15, 0.15), c(5, 5), c(5, 5)),
   "exgaussian" = list(c(4, 4), c(4, 4), c(2.5, 2.5)),
@@ -284,9 +284,9 @@ data_generation_configuration$id <- as.numeric(
 ```{r}
 fit_configuration <- expand.grid(
   fit_family = c(
-    "gaussian"#,
+    # #"gaussian",
     # #"student",
-    #"skew_normal",
+    "skew_normal"#,
     # "generalized_normal",
     # #"asym_laplace",
     # "exgaussian",
