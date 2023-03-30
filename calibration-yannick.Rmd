@@ -135,7 +135,7 @@ set.seed(SEED)
 options(error = recover) # for easier debugging
 DEBUG <- FALSE # unless you want every single simulation step written to disk
 
-DATASET_N <- 50 # 5-10-ish for calibration, 200 for the final experiment
+DATASET_N <- 100 # 5-10-ish for calibration, 200 for the final experiment
 
 stan_pars <- list(
   backend = "rstan",
@@ -202,9 +202,9 @@ data_generation_configuration <- expand.grid(
   y_intercept = NA,
   sigma_y = list(NA),
   shape = c(
-    "thin"#,
-    #"wide"#,
-    #"skewed"
+    "thin",
+    "wide",
+    "skewed"
     ),
   noise_sd = 0.2, # not used in normal basedag
   stringsAsFactors = FALSE
@@ -212,19 +212,19 @@ data_generation_configuration <- expand.grid(
 
 skew_filter <- c("gaussian", "student", "generalized_normal", "logistic")
 data_generation_configuration <- family_filter(data_generation_configuration, skew_filter, "skewed")
-thin_filter <- c("gumbel")#, "exgaussian") # exgauss does not do wide well at all
+thin_filter <- c("gumbel", "exgaussian") # exgauss does not do wide well at all
 data_generation_configuration <- family_filter(data_generation_configuration, thin_filter, "thin")
-wide_filter <- c("exgaussian")#, "student")
-data_generation_configuration <- family_filter(data_generation_configuration, wide_filter, "wide")
+family_filter(data_generation_configuration, c("exgaussian"), "wide")
 
 z1z2_y_list <- list(
   "gaussian" = list(c(15, 15), c(8, 8)),
   "student" = list(c(2, 2), c(2, 2)),
   "skew_normal" = list(c(0.5, 0.5), c(0.1, 0.1), c(0.5, 0.5)),
-  "generalized_normal" = list(c(0.5, 0.5), c(-3.2, -3.2)),#think, -3.2 was about 6%
+  "generalized_normal" = list(c(0.1, -32.5), c(-3.2, -3.2)),#think, -3.2 was about 6%
   # arg gen-normal thin FPR moment only about 2%!
+  # 0.1 and -32 are 3% YES!
   "asym_laplace" = list(c(1, 1), c(3.5, 3.5), c(30, 30)),
-  "exgaussian" = list(c(7.5, 7.5), NA, c(12, 12)),
+  "exgaussian" = list(c(7.5, 7.5), c(2, 2), c(1, 1)),
   "gumbel" = list(NA, c(0.5, 0.5), c(0.5, 0.5)),
   "logistic" = list(c(1.9, 1.9), c(3, 3)),
   "symlognormal" = list(c(-0.2, -0.2), c(9, 9), c(0.5, 0.5))
@@ -234,7 +234,7 @@ sigma_y_list <- list(
   "gaussian" = c(1.2, 5), # if equal x_y_coeff, 0 FPR in y ~ x + z1 + z2
   "student" = list(c(2, 1), c(2, 5)), # student only really does thin
   "skew_normal" = list(c(1.2, 0), c(5, 0), c(2, 10)),
-  "generalized_normal" = list(c(1.5, 2), c(4, 0.8)), # 0.8 is not as wide as possible
+  "generalized_normal" = list(c(0.5, 2), c(4, 0.8)), # 0.8 is not as wide as possible
   # but anything below 0.8 has trouble with divergent chains
   "asym_laplace" = list(c(0.8, 0.5), c(2, 0.5), c(0.4, 0.1)),
   "exgaussian" = list(c(1, 0.5), c(6, 0.5), c(1, 3)),
@@ -286,15 +286,15 @@ data_generation_configuration$id <- as.numeric(
 ```{r}
 fit_configuration <- expand.grid(
   fit_family = c(
-    #"gaussian", # FPR passt
-    #"student", # FPR passt
-    #"skew_normal", # FPR thin too high
-    "generalized_normal"#, # FPR thin too low
-    #"asym_laplace", # FPR skewed is wonky!
-    #"exgaussian", # FPR skewed good. Anything else does not work well at all
-    #"gumbel"#, # FPR skewed ok, wide is too low
-    #"logistic", # FPR ok, thin in z1z2 1.9 too low and 2 is too high
-    #"symlognormal" # FPR good
+    # "gaussian", # FPR passt
+    # "student", # FPR passt
+    # "skew_normal", # FPR thin too high
+    # "generalized_normal", # FPR thin too low
+    # "asym_laplace", # FPR skewed is wonky!
+    # "exgaussian", # FPR skewed good. Anything else does not work well at all
+    # "gumbel", # FPR skewed ok, wide is too low
+    # "logistic", # FPR ok, thin in z1z2 1.9 too low and 2 is too high
+    "symlognormal" # FPR good
   ),
   fit_link = c(
     "identity"
