@@ -197,14 +197,14 @@ data_generation_configuration <- expand.grid(
   lb = -Inf,
   ub = Inf,
   resample = 1.3,
-  #x_y_coef = c(NA, 0),
-  x_y_coef = c(0),
+  x_y_coef = c(NA, 0),
+  # x_y_coef = c(0),
   y_intercept = NA,
   sigma_y = list(NA),
   shape = c(
     "thin",
-    "wide"#,
-    # "skewed"
+    "wide",
+    "skewed"
     ),
   noise_sd = 0.2, # not used in normal basedag
   stringsAsFactors = FALSE
@@ -214,7 +214,7 @@ skew_filter <- c("gaussian", "student", "generalized_normal", "logistic")
 data_generation_configuration <- family_filter(data_generation_configuration, skew_filter, "skewed")
 thin_filter <- c("gumbel", "exgaussian") # exgauss does not do wide well at all
 data_generation_configuration <- family_filter(data_generation_configuration, thin_filter, "thin")
-family_filter(data_generation_configuration, c("exgaussian"), "wide")
+data_generation_configuration <- family_filter(data_generation_configuration, "exgaussian", "wide")
 
 z1z2_y_list <- list(
   "gaussian" = list(c(15, 15), c(8, 8)),
@@ -225,7 +225,7 @@ z1z2_y_list <- list(
   # 0.1 and -32 are 3% YES!
   "asym_laplace" = list(c(1, 1), c(3.5, 3.5), c(30, 30)),
   "exgaussian" = list(NA, NA, c(1, 1)),
-  "gumbel" = list(NA, c(-5, -5), c(0.5, 0.5)),
+  "gumbel" = list(NA, c(-1, 1), c(0.5, 0.5)),
   "logistic" = list(c(1.9, 1.9), c(3, 3)),
   "symlognormal" = list(c(-0.2, -0.2), c(9, 9), c(0.5, 0.5))
 )
@@ -286,15 +286,15 @@ data_generation_configuration$id <- as.numeric(
 ```{r}
 fit_configuration <- expand.grid(
   fit_family = c(
-    # "gaussian", # FPR passt
-    # "student", # FPR passt
-    # "skew_normal", # FPR thin too high
-    # "generalized_normal", # FPR thin too low
-    # "asym_laplace", # FPR skewed is wonky!
-    # "exgaussian", # FPR skewed good. Anything else does not work well at all
-    "gumbel"#, # FPR skewed ok, wide is too low
-    # "logistic", # FPR ok, thin in z1z2 1.9 too low and 2 is too high
-    #"symlognormal" # FPR good
+    "gaussian", # FPR passt
+    "student", # FPR passt
+    "skew_normal", # FPR thin too high
+    "generalized_normal", # FPR thin too low
+    "asym_laplace", # FPR skewed is wonky!
+    "exgaussian", # FPR skewed good. Anything else does not work well at all
+    "gumbel", # FPR skewed ok, wide is too low
+    "logistic", # FPR ok, thin in z1z2 1.9 too low and 2 is too high
+    "symlognormal" # FPR good
   ),
   fit_link = c(
     "identity"
