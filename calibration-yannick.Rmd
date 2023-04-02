@@ -285,14 +285,14 @@ data_generation_configuration$id <- as.numeric(
 ```{r}
 fit_configuration <- expand.grid(
   fit_family = c(
-    # "gaussian"#, # FPR passt
-    # "student"#, # FPR passt
-    # "skew_normal"#, # FPR thin too high
-    # "generalized_normal"#, # FPR thin too low
-    # "asym_laplace"#, # FPR skewed is wonky!
-    # "exgaussian"#, # FPR skewed good. Anything else does not work well at all
-    # "gumbel"#, # FPR skewed ok, wide is too low
-    # "logistic"#, # FPR ok, thin in z1z2 1.9 too low and 2 is too high
+    "gaussian", # FPR passt
+    "student", # FPR passt
+    "skew_normal", # FPR thin too high
+    "generalized_normal", # FPR thin too low
+    "asym_laplace", # FPR skewed is wonky!
+    "exgaussian", # FPR skewed good. Anything else does not work well at all
+    "gumbel", # FPR skewed ok, wide is too low
+    "logistic", # FPR ok, thin in z1z2 1.9 too low and 2 is too high
     "symlognormal" # FPR good
   ),
   fit_link = c(
