@@ -1,0 +1,372 @@
+---
+title: "Calibration"
+output: html_document
+date: "2023-02-21"
+---
+
+---
+title: "calibration"
+format: html
+editor: visual
+---
+
+# Setup
+
+```{r}
+library(brms)
+library(bayesim)
+library(bayesfam)
+library(dplyr)
+library(purrr)
+library(patchwork)
+library(ggplot2)
+library(ggthemes)
+set.seed(1235813)
+```
+
+```{r}
+plot_dist <- function(dist, bounds, pars, prefix = "d", parnames = NULL,
+                      package = NULL, user_theme = ggthemes::theme_tufte, ...) {
+  `%>%` <- dplyr::`%>%`
+  pos <- -1
+  if (!is.null(package)) {
+    pos <- asNamespace(package)
+  }
+  ddist <- get(paste0(prefix, dist), pos = pos, mode = "function")
+  df <- data.frame(x = seq(bounds[1], bounds[2], 0.001))
+  if (!is.null(parnames)) {
+    parnames <- paste0(parnames, " = ")
+  }
+  cnames <- rep(NA, length(pars))
+  for (i in seq_along(pars)) {
+    tmp <- do.call(ddist, c(list(df$x), pars[[i]], list(...)))
+    cnames[i] <- paste0("$", parnames, pars[[i]], "$", collapse = ", ")
+    df[paste0(parnames, pars[[i]], collapse = ", ")] <- tmp
+  }
+  df <- df %>%
+    tidyr::gather("pars", "dens", -x) %>%
+    dplyr::mutate(pars = factor(pars, unique(pars)))
+  gg <- ggplot2::ggplot(df, ggplot2::aes(x, dens, color = pars)) +
+    user_theme() +
+    ggplot2::geom_line(size = 1) +
+    ggplot2::scale_color_viridis_d(labels = unname(latex2exp::TeX(cnames))) +
+    ggplot2::labs(x = "x", y = "", color = "") +
+    ggplot2::theme(
+      axis.text.y = ggplot2::element_blank(),
+      axis.ticks.y = ggplot2::element_blank(),
+      axis.line.y = ggplot2::element_blank(),
+      legend.position = "bottom",
+      legend.text = ggplot2::element_text(size = 10)
+    )
+  if (prefix == "p") {
+    gg <- gg +
+      ggplot2::scale_y_continuous(breaks = c(0, 0.5, 1)) +
+      ggplot2::theme(
+        axis.ticks.y = ggplot2::element_line(),
+        axis.text.y = ggplot2::element_text(),
+        axis.line.y = ggplot2::element_line()
+      )
+  } else if (prefix == "q") {
+    gg <- gg +
+      ggplot2::scale_y_continuous() +
+      ggplot2::theme(
+        axis.ticks.y = ggplot2::element_line(),
+        axis.text.y = ggplot2::element_text(),
+        axis.line.y = ggplot2::element_line()
+      )
+  }
+  return(gg)
+}
+```
+
+# Likelihoods
+
+## Gamma
+
+<!-- ```{r} -->
+<!-- p1 <- plot_dist( -->
+<!--   dist = "gamma_mean", -->
+<!--   bounds = c(0.00001, 20), -->
+<!--   parnames = c("mu", "a"), -->
+<!--   package = "bayesim", -->
+<!--   pars = list( -->
+<!--     c(1, 1), -->
+<!--     c(10, 10), -->
+<!--     c(10, 40) -->
+<!--     ), -->
+<!--   user_theme = partial(theme_tufte, base_family = "") -->
+<!--   ) + -->
+<!--   ggtitle("Gamma") + -->
+<!--   guides(color = "none") + -->
+<!--   coord_cartesian(ylim = c(0, 0.4)) + -->
+<!--   geom_vline(xintercept = 0, linetype = "dotted", color = "grey") -->
+<!-- p1 -->
+<!-- ``` -->
+
+
+<!-- ## Combined -->
+
+<!-- ```{r} -->
+<!-- (((p1 + p2)/(p5 + p6)/(p7 + p8) /(p3 + p4)) ) + theme(text=element_text(size=12)) -->
+<!-- ggsave("~/Pictures/dist_overvoew.png", width = 210, height = (297/4)*2.2, units = "mm", dpi = 300) -->
+<!-- ``` -->
+
+# filter-helper
+
+```{r}
+family_filter <- function(table, family_vector, filter_shape) {
+  
+  for(filter_family in family_vector) {
+    table <- filter(table, !((data_family == filter_family) & (shape == filter_shape)))
+  }
+  return(table)
+}
+```
+
+
+# Sim Setup
+
+```{r}
+RESULT_PATH <- NULL #"~/Dokumente/simresults"
+NCORES <- 5 # physical cores -1 or less
+CLUSTER_TYPE <- "FORK" # or PSOCK if you have Windows
+SEED <- 1339
+set.seed(SEED)
+options(error = recover) # for easier debugging
+DEBUG <- FALSE # unless you want every single simulation step written to disk
+
+DATASET_N <- 50 # 5-10-ish for calibration, 200 for the final experiment
+
+stan_pars <- list(
+  backend = "rstan",
+  cmdstan_path = NULL,
+  cmdstan_write_path = NULL,
+  warmup = 500,
+  iter = 1500,
+  chains = 1,
+  init = 0.1
+)
+
+metrics <- c(
+  "v_pos_prob",
+  "v_quantiles",
+  "divergent_transitions_rel",
+  "rhat",
+  "ess_bulk",
+  "ess_tail",
+  "data_gen",
+  "fit_gen"
+)
+
+VARS_OF_INTEREST = list(list(c("b_x")))
+#QUANTILES = list(list(seq(0.1, 0.9, length.out = 9)))
+QUANTILES = list(list(c(0.025, 0.975)))
+```
+
+# Data Gen Setup
+
+```{r}
+data_config_ideal <- expand.grid(
+  z1_x_coef = 0.5,
+  z1_y_coef = 2,
+  z2_y_coef = 2,
+  z3_x_coef = 1,
+  x_z4_coef = 1,
+  y_z4_coef = 1,
+  sigma_z1 = 2,
+  sigma_z2 = 2,
+  sigma_z3 = 1,
+  sigma_z4 = 0.5,
+  sigma_x = 1,
+  data_N = 100,
+  dataset_N = DATASET_N,
+  data_family = c(
+    "gaussian",
+    "student",
+    "skew_normal",
+    "generalized_normal",
+    "asym_laplace",
+    "exgaussian",
+    "gumbel",
+    "logistic",
+    "symlognormal"
+  ),
+  data_link = c(
+    "identity"
+    ),
+  lb = -Inf,
+  ub = Inf,
+  resample = 1.3,
+  x_y_coef = c(NA, 0),
+  # x_y_coef = c(0),
+  y_intercept = NA,
+  sigma_y = list(NA),
+  shape = c(
+    "thin",
+    "wide",
+    "skewed"
+    ),
+  noise_sd = 0.2, # not used in normal basedag
+  stringsAsFactors = FALSE
+)
+
+skew_filter <- c("gaussian", "student", "generalized_normal", "logistic")
+data_config_ideal <- family_filter(data_config_ideal, skew_filter, "skewed")
+thin_filter <- c("gumbel")#, "exgaussian") # exgauss does not do wide well at all
+data_config_ideal <- family_filter(data_config_ideal, thin_filter, "thin")
+# data_generation_configuration <- family_filter(data_generation_configuration, "exgaussian", "wide")
+
+z1z2_y_ideal_list <- list(
+  "gaussian" = list(c(25, 25), c(-2, -2)),
+  "student" = list(c(-2, -2), c(-3, -3)),
+  "skew_normal" = list(c(-0.1, 0.1), c(-0.1, -0.1), c(-1, 1)), #skewed FPR too low
+  "generalized_normal" = list(c(-0.5, -0.5), c(-2, -2)),
+  "asym_laplace" = list(c(12, -6), c(-0.5, -0.5), c(1, 1)),
+  "exgaussian" = list(c(0.1, 0.1), c(0.1, 0.1), c(-0.1, -0.1)),
+  "gumbel" = list(NA, c(-4, -4), c(0.5, 0.5)),
+  "logistic" = list(c(-3, -3), c(9, 9)),
+  "symlognormal" = list(c(3, 3), c(3, 3), c(1, 1))
+)
+
+x_y_ideal_list <- list(
+  "gaussian"     = c(0.33, 1.3),
+  "student"      = c(0.37, 2.2),
+  "skew_normal"  = c(0.337, 1.19, 0.368),
+  "generalized_normal" = c(0.1, 1.6),
+  "asym_laplace" = c(0.5, 1.2, 0.65),
+  "exgaussian"   = c(0.5,  3,   0.55),
+  "gumbel"       = c(NA,  1.6, 0.6),
+  "logistic"     = c(0.38, 1.2),
+  "symlognormal" = c(0.27, 1.1, 0.14)
+  # sln thin 0.35
+)
+
+# sigma_y is always the same!
+sigma_y_list <- list(
+  "gaussian" = c(1.2, 5), # if equal x_y_coeff, 0 FPR in y ~ x + z1 + z2
+  "student" = list(c(2, 1), c(2, 5)), # student only really does thin
+  "skew_normal" = list(c(1.2, 0), c(5, 0), c(2, 10)),
+  "generalized_normal" = list(c(0.5, 2), c(4, 0.8)), # 0.8 is not as wide as possible
+  # but anything below 0.8 has trouble with divergent chains
+  "asym_laplace" = list(c(0.8, 0.5), c(2, 0.5), c(0.4, 0.1)),
+  "exgaussian" = list(c(1, 0.5), c(6, 0.5), c(1, 3)),
+  "gumbel" = c(NA, 6, 2), # no thin, form (so NA). wide - skewed
+  "logistic" = c(0.8, 3),
+  "symlognormal" = c(1, 4, 0.5)
+)
+
+# y_intercept is always the same!
+y_intercept_list <- c(0, 0, -1.5)
+shape_index_lookup <- list("thin" = 1, "wide" = 2, "skewed" = 3)
+
+for (i in seq_len(nrow(data_config_ideal))) {
+  family <- data_config_ideal$data_family[[i]]
+  shape_name <- data_config_ideal$shape[[i]]
+  shape_index <- shape_index_lookup[[shape_name]]
+  
+  data_config_ideal$z1_y_coef[[i]] <- z1z2_y_ideal_list[[family]][[shape_index]][1]
+  data_config_ideal$z2_y_coef[[i]] <- z1z2_y_ideal_list[[family]][[shape_index]][2]
+  
+  data_config_ideal$sigma_y[[i]] <- sigma_y_list[[family]][[shape_index]]
+  data_config_ideal$y_intercept[[i]] <- y_intercept_list[[shape_index]]
+  if(is.na(data_config_ideal$x_y_coef[[i]])) {
+    data_config_ideal$x_y_coef[[i]] <- x_y_ideal_list[[family]][[shape_index]]
+  }
+}
+
+data_config_ideal$id <- as.numeric(
+  rownames(data_config_ideal)
+)
+```
+
+# Fit Gen Setup
+
+```{r}
+fit_config_ideal <- expand.grid(
+  fit_family = c(
+    "gaussian"#, # FPR passt
+    # "student", # FPR passt
+    # "skew_normal", # FPR thin too high
+    # "generalized_normal", # FPR thin too low
+    # "asym_laplace", # FPR skewed is wonky!
+    # "exgaussian"#, # FPR skewed good. Anything else does not work well at all
+    # "gumbel", # FPR skewed ok, wide is too low
+    # "logistic", # FPR ok, thin in z1z2 1.9 too low and 2 is too high
+    # "symlognormal" # FPR good
+  ),
+  fit_link = c(
+    "identity"
+  ),
+  formula = c(
+    # "y ~ x + z1 + z2"#,
+   "y ~ x + z1"#,
+   # "y ~ x + z1 + z2 + z3"#,
+   # "y ~ x + z2"#,
+#    "y ~ x + z1 + z2 + z4"
+  ),
+  stringsAsFactors = FALSE
+)
+
+fit_config_ideal$prior = c() # should stay empty for this
+```
+
+# Simulation
+
+```{r}
+start_time <- Sys.time()
+result_df <- full_simulation(
+  data_gen_confs = data_config_ideal,
+  data_gen_fun = basedag_data,
+  fit_confs = fit_config_ideal,
+  metrics = metrics,
+  ncores_simulation = 1,
+  cluster_type = CLUSTER_TYPE,
+  stan_pars = stan_pars,
+  seed = SEED,
+  result_path = RESULT_PATH,
+  debug = DEBUG,
+  calibration_mode = TRUE,
+  time_info = TRUE,
+  vars_of_interest = VARS_OF_INTEREST,
+  quantiles = QUANTILES
+)
+
+end_time <- Sys.time()
+print(end_time - start_time)
+```
+
+```{r}
+cols <- c("formula", "data_family", "shape", "zero_effect")
+
+p1 <- result_df %>%
+  filter(data_family == fit_family) %>%
+  filter(divergent_transitions_rel == 0) %>%
+  filter(rhat_b_x <= 1.01) %>%
+  filter(ess_bulk_b_x > 400) %>%
+  filter(ess_tail_b_x > 400) %>%
+  mutate(sig95 = as.numeric(b_x_2_5pq > 0 | b_x_97_5pq < 0),
+         zero_effect = ifelse(x_y_coef == 0, "FPR", "Power")) %>%
+  group_by(across(all_of(cols))) %>%
+  #summarise(sig95 = mean(1 - sig95)) %>%
+  summarise(sig95 = mean(sig95)) %>%
+  ggplot() +
+  geom_bar(aes(data_family, x = sig95), stat = "identity") +
+  geom_vline(xintercept = 0.05) +
+  geom_vline(xintercept = 0.95) +
+  facet_grid(zero_effect + shape ~ formula) +
+  ggtitle("95% CI coverage of true x_y_coef") +
+  ylab("Formula") +
+  xlab("CI Calibration")
+
+p1
+```
+
+Explanation:
+- If the true effect (x_y_coef) = 0, having no 0 in the CI (sig95) is a false positive (or alpha error)
+- If the true effect (x_y_coef) != 0, having no 0 in the CI (sig95) is a true positive (or power)
+- As we use 95% CIs, we would like the alpha error to be 5% and the power to be 95%. This won't perfectly work but we try to kinda get there.
+- As this can only be fairly measured, we only compare models where link and family were the same as the data generating ones)
+- We also know that some formulas are causally misspecified leading to reduced precision and bias.
+- y~x+z1+z2 is the ideal formula. We want our parameters to be such that we get the 5% FPR (false positive rate) and 95% power
+- y~x + z1 and y~ x+ z1 + z2 + z3 are unbiased but have less precision. We want them to be close to the 5% and 95% but they should naturally perform slightly worse (ie. higher FPR and lower power) than the ideal formula. No fiddling should be necessary after the ideal formula works.
+- y ~ x + z2 and y ~ x + z1 + z2 + z4 are biased formulas. Here everything goes bad. We want them to show higher FPR than the oder three formulas. This will require fiddling with the related effects of z1 and z4. However we do not want either FPR or power to be 0 or 1, as we loose information about how good/bad we are when running into the boundaries. If in doubt, try aiming for an FPR over 20% and a power over 70% but don't sweat it. 

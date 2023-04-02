@@ -166,7 +166,7 @@ QUANTILES = list(list(c(0.025, 0.975)))
 # Data Gen Setup
 
 ```{r}
-data_generation_configuration <- expand.grid(
+data_config_unbiased1 <- expand.grid(
   z1_x_coef = 0.5,
   z1_y_coef = 2,
   z2_y_coef = 2,
@@ -211,36 +211,37 @@ data_generation_configuration <- expand.grid(
 )
 
 skew_filter <- c("gaussian", "student", "generalized_normal", "logistic")
-data_generation_configuration <- family_filter(data_generation_configuration, skew_filter, "skewed")
-thin_filter <- c("gumbel", "exgaussian") # exgauss does not do wide well at all
-data_generation_configuration <- family_filter(data_generation_configuration, thin_filter, "thin")
-data_generation_configuration <- family_filter(data_generation_configuration, "exgaussian", "wide")
+data_config_unbiased1 <- family_filter(data_config_unbiased1, skew_filter, "skewed")
+thin_filter <- c("gumbel")#, "exgaussian") # exgauss does not do wide well at all
+data_config_unbiased1 <- family_filter(data_config_unbiased1, thin_filter, "thin")
+# data_generation_configuration <- family_filter(data_generation_configuration, "exgaussian", "wide")
 
-z1z2_y_list <- list(
+z1z2_y_unbiased1_list <- list(
   "gaussian" = list(c(25, 25), c(-2, -2)),
   "student" = list(c(-2, -2), c(-3, -3)),
   "skew_normal" = list(c(-0.1, 0.1), c(-0.1, -0.1), c(-1, 1)), #skewed FPR too low
   "generalized_normal" = list(c(-0.5, -0.5), c(-2, -2)),
   "asym_laplace" = list(c(12, -6), c(-0.5, -0.5), c(1, 1)),
-  "exgaussian" = list(NA, NA, c(-0.1, -0.1)),
+  "exgaussian" = list(c(0.1, 0.1), c(0.1, 0.1), c(-0.1, -0.1)),
   "gumbel" = list(NA, c(-4, -4), c(0.5, 0.5)),
   "logistic" = list(c(-3, -3), c(9, 9)),
   "symlognormal" = list(c(3, 3), c(3, 3), c(1, 1))
 )
 
-x_y_coef_list <- list(
+x_y_unbiased1_list <- list(
   "gaussian"     = c(0.33, 1.3),
   "student"      = c(0.37, 2.2),
   "skew_normal"  = c(0.337, 1.19, 0.368),
   "generalized_normal" = c(0.1, 1.6),
   "asym_laplace" = c(0.5, 1.2, 0.65),
-  "exgaussian"   = c(0.7,  0.7,   0.55),
+  "exgaussian"   = c(0.5,  3,   0.55),
   "gumbel"       = c(NA,  1.6, 0.6),
   "logistic"     = c(0.38, 1.2),
   "symlognormal" = c(0.27, 1.1, 0.14)
   # sln thin 0.35
 )
 
+# sigma_y is always the same!
 sigma_y_list <- list(
   "gaussian" = c(1.2, 5), # if equal x_y_coeff, 0 FPR in y ~ x + z1 + z2
   "student" = list(c(2, 1), c(2, 5)), # student only really does thin
@@ -254,61 +255,59 @@ sigma_y_list <- list(
   "symlognormal" = c(1, 4, 0.5)
 )
 
-# Given our aux is usually log, compare to log reference
+# y_intercept is always the same!
 y_intercept_list <- c(0, 0, -1.5)
-# too much FPR, more xy-coeff
-#x_y_coef_list <- c(0.4, 1.6, 0.4)
 shape_index_lookup <- list("thin" = 1, "wide" = 2, "skewed" = 3)
 
-for (i in seq_len(nrow(data_generation_configuration))) {
-  family <- data_generation_configuration$data_family[[i]]
-  shape_name <- data_generation_configuration$shape[[i]]
+for (i in seq_len(nrow(data_config_unbiased1))) {
+  family <- data_config_unbiased1$data_family[[i]]
+  shape_name <- data_config_unbiased1$shape[[i]]
   shape_index <- shape_index_lookup[[shape_name]]
   
-  data_generation_configuration$z1_y_coef[[i]] <- z1z2_y_list[[family]][[shape_index]][1]
-  data_generation_configuration$z2_y_coef[[i]] <- z1z2_y_list[[family]][[shape_index]][2]
+  data_config_unbiased1$z1_y_coef[[i]] <- z1z2_y_unbiased1_list[[family]][[shape_index]][1]
+  data_config_unbiased1$z2_y_coef[[i]] <- z1z2_y_unbiased1_list[[family]][[shape_index]][2]
   
-  data_generation_configuration$sigma_y[[i]] <- sigma_y_list[[family]][[shape_index]]
-  data_generation_configuration$y_intercept[[i]] <- y_intercept_list[[shape_index]]
-  if(is.na(data_generation_configuration$x_y_coef[[i]])) {
-    data_generation_configuration$x_y_coef[[i]] <- x_y_coef_list[[family]][[shape_index]]
+  data_config_unbiased1$sigma_y[[i]] <- sigma_y_list[[family]][[shape_index]]
+  data_config_unbiased1$y_intercept[[i]] <- y_intercept_list[[shape_index]]
+  if(is.na(data_config_unbiased1$x_y_coef[[i]])) {
+    data_config_unbiased1$x_y_coef[[i]] <- x_y_unbiased1_list[[family]][[shape_index]]
   }
 }
 
-data_generation_configuration$id <- as.numeric(
-  rownames(data_generation_configuration)
+data_config_unbiased1$id <- as.numeric(
+  rownames(data_config_unbiased1)
 )
 ```
 
 # Fit Gen Setup
 
 ```{r}
-fit_configuration <- expand.grid(
+fit_config_unbiased1 <- expand.grid(
   fit_family = c(
-    "gaussian", # FPR passt
-    "student", # FPR passt
-    "skew_normal", # FPR thin too high
-    "generalized_normal", # FPR thin too low
-    "asym_laplace", # FPR skewed is wonky!
-    "exgaussian", # FPR skewed good. Anything else does not work well at all
-    "gumbel", # FPR skewed ok, wide is too low
-    "logistic", # FPR ok, thin in z1z2 1.9 too low and 2 is too high
-    "symlognormal" # FPR good
+    "gaussian"#, # FPR passt
+    # "student", # FPR passt
+    # "skew_normal", # FPR thin too high
+    # "generalized_normal", # FPR thin too low
+    # "asym_laplace", # FPR skewed is wonky!
+    # "exgaussian"#, # FPR skewed good. Anything else does not work well at all
+    # "gumbel", # FPR skewed ok, wide is too low
+    # "logistic", # FPR ok, thin in z1z2 1.9 too low and 2 is too high
+    # "symlognormal" # FPR good
   ),
   fit_link = c(
     "identity"
   ),
   formula = c(
-    "y ~ x + z1 + z2"#,
-#    "y ~ x + z2"#,
-#    "y ~ x + z1",
-#    "y ~ x + z1 + z2 + z3",
+    # "y ~ x + z1 + z2"#,
+   "y ~ x + z1"#,
+   # "y ~ x + z1 + z2 + z3"#,
+   # "y ~ x + z2"#,
 #    "y ~ x + z1 + z2 + z4"
   ),
   stringsAsFactors = FALSE
 )
 
-fit_configuration$prior = c() # should stay empty for this
+fit_config_unbiased1$prior = c() # should stay empty for this
 ```
 
 # Simulation
@@ -316,9 +315,9 @@ fit_configuration$prior = c() # should stay empty for this
 ```{r}
 start_time <- Sys.time()
 result_df <- full_simulation(
-  data_gen_confs = data_generation_configuration,
+  data_gen_confs = data_config_unbiased1,
   data_gen_fun = basedag_data,
-  fit_confs = fit_configuration,
+  fit_confs = fit_config_unbiased1,
   metrics = metrics,
   ncores_simulation = 1,
   cluster_type = CLUSTER_TYPE,
