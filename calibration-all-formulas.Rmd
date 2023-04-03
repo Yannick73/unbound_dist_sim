@@ -135,7 +135,7 @@ set.seed(SEED)
 options(error = recover) # for easier debugging
 DEBUG <- FALSE # unless you want every single simulation step written to disk
 
-DATASET_N <-5 # 5-10-ish for calibration, 200 for the final experiment
+DATASET_N <- 5 # 5-10-ish for calibration, 200 for the final experiment
 
 stan_pars <- list(
   backend = "rstan",
@@ -218,7 +218,7 @@ data_config <- family_filter(data_config, thin_filter, "thin")
 data_config <- family_filter(data_config, "exgaussian", "wide")
 
 z1z2_y_list <- list(
-  "gaussian" = list(c(3, 1), c(3, 1)),
+  "gaussian" = list(c(1, 1), c(1, 1)),
   "student" = list(c(-2, -2), c(-3, -3)),
   "skew_normal" = list(c(-0.1, 0.1), c(-0.1, -0.1), c(-1, 1)), #skewed FPR too low
   "generalized_normal" = list(c(-0.5, -0.5), c(-2, -2)),
@@ -230,7 +230,7 @@ z1z2_y_list <- list(
 )
 
 x_y_list <- list(
-  "gaussian"     = c(0.2, 0.6),
+  "gaussian"     = c(0.45, 2),
   "student"      = c(0.37, 2.2),
   "skew_normal"  = c(0.337, 1.19, 0.368),
   "generalized_normal" = c(0.1, 1.6),
@@ -243,7 +243,7 @@ x_y_list <- list(
 )
 
 z1z3_x_list <- list(
-  "gaussian" = list(c(0.5, 1), c(0.5, 1)),
+  "gaussian" = list(c(1, 0.3), c(1, 0.3)),
   "student" = list(c(0.5, 1), c(0.5, 1)),
   "skew_normal" = list(c(0.5, 1), c(0.5, 1), c(-1, 1)), #skewed FPR too low
   "generalized_normal" = list(c(0.5, 1), c(0.5, 1)),
@@ -256,7 +256,7 @@ z1z3_x_list <- list(
 
 # first entry x_z4, second y_z4
 x_y_z4_list <- list(
-  "gaussian" = list(c(1, 1), c(1, 1)),
+  "gaussian" = list(c(0.1, 0.1), c(0.1, 0.1)),
   "student" = list(c(1, 1), c(1, 1)),
   "skew_normal" = list(c(1, 1), c(1, 1), c(1, 1)), #skewed FPR too low
   "generalized_normal" = list(c(1, 1), c(1, 1)),
