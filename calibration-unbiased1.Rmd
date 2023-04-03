@@ -24,93 +24,6 @@ library(ggthemes)
 set.seed(1235813)
 ```
 
-```{r}
-plot_dist <- function(dist, bounds, pars, prefix = "d", parnames = NULL,
-                      package = NULL, user_theme = ggthemes::theme_tufte, ...) {
-  `%>%` <- dplyr::`%>%`
-  pos <- -1
-  if (!is.null(package)) {
-    pos <- asNamespace(package)
-  }
-  ddist <- get(paste0(prefix, dist), pos = pos, mode = "function")
-  df <- data.frame(x = seq(bounds[1], bounds[2], 0.001))
-  if (!is.null(parnames)) {
-    parnames <- paste0(parnames, " = ")
-  }
-  cnames <- rep(NA, length(pars))
-  for (i in seq_along(pars)) {
-    tmp <- do.call(ddist, c(list(df$x), pars[[i]], list(...)))
-    cnames[i] <- paste0("$", parnames, pars[[i]], "$", collapse = ", ")
-    df[paste0(parnames, pars[[i]], collapse = ", ")] <- tmp
-  }
-  df <- df %>%
-    tidyr::gather("pars", "dens", -x) %>%
-    dplyr::mutate(pars = factor(pars, unique(pars)))
-  gg <- ggplot2::ggplot(df, ggplot2::aes(x, dens, color = pars)) +
-    user_theme() +
-    ggplot2::geom_line(size = 1) +
-    ggplot2::scale_color_viridis_d(labels = unname(latex2exp::TeX(cnames))) +
-    ggplot2::labs(x = "x", y = "", color = "") +
-    ggplot2::theme(
-      axis.text.y = ggplot2::element_blank(),
-      axis.ticks.y = ggplot2::element_blank(),
-      axis.line.y = ggplot2::element_blank(),
-      legend.position = "bottom",
-      legend.text = ggplot2::element_text(size = 10)
-    )
-  if (prefix == "p") {
-    gg <- gg +
-      ggplot2::scale_y_continuous(breaks = c(0, 0.5, 1)) +
-      ggplot2::theme(
-        axis.ticks.y = ggplot2::element_line(),
-        axis.text.y = ggplot2::element_text(),
-        axis.line.y = ggplot2::element_line()
-      )
-  } else if (prefix == "q") {
-    gg <- gg +
-      ggplot2::scale_y_continuous() +
-      ggplot2::theme(
-        axis.ticks.y = ggplot2::element_line(),
-        axis.text.y = ggplot2::element_text(),
-        axis.line.y = ggplot2::element_line()
-      )
-  }
-  return(gg)
-}
-```
-
-# Likelihoods
-
-## Gamma
-
-<!-- ```{r} -->
-<!-- p1 <- plot_dist( -->
-<!--   dist = "gamma_mean", -->
-<!--   bounds = c(0.00001, 20), -->
-<!--   parnames = c("mu", "a"), -->
-<!--   package = "bayesim", -->
-<!--   pars = list( -->
-<!--     c(1, 1), -->
-<!--     c(10, 10), -->
-<!--     c(10, 40) -->
-<!--     ), -->
-<!--   user_theme = partial(theme_tufte, base_family = "") -->
-<!--   ) + -->
-<!--   ggtitle("Gamma") + -->
-<!--   guides(color = "none") + -->
-<!--   coord_cartesian(ylim = c(0, 0.4)) + -->
-<!--   geom_vline(xintercept = 0, linetype = "dotted", color = "grey") -->
-<!-- p1 -->
-<!-- ``` -->
-
-
-<!-- ## Combined -->
-
-<!-- ```{r} -->
-<!-- (((p1 + p2)/(p5 + p6)/(p7 + p8) /(p3 + p4)) ) + theme(text=element_text(size=12)) -->
-<!-- ggsave("~/Pictures/dist_overvoew.png", width = 210, height = (297/4)*2.2, units = "mm", dpi = 300) -->
-<!-- ``` -->
-
 # filter-helper
 
 ```{r}
@@ -217,10 +130,10 @@ data_config_unbiased1 <- family_filter(data_config_unbiased1, thin_filter, "thin
 # data_generation_configuration <- family_filter(data_generation_configuration, "exgaussian", "wide")
 
 z1z2_y_unbiased1_list <- list(
-  "gaussian" = list(c(25, 25), c(-2, -2)),
-  "student" = list(c(-2, -2), c(-3, -3)),
-  "skew_normal" = list(c(-0.1, 0.1), c(-0.1, -0.1), c(-1, 1)), #skewed FPR too low
-  "generalized_normal" = list(c(-0.5, -0.5), c(-2, -2)),
+  "gaussian" = list(c(5, 5), c(5, 5)),
+  "student" = list(c(-2, -2), c(3, 3)),
+  "skew_normal" = list(c(-1, 1), c(-1, 1), c(3, 3)), #skewed FPR too low
+  "generalized_normal" = list(c(-2, -2), c(2, 2)),
   "asym_laplace" = list(c(12, -6), c(-0.5, -0.5), c(1, 1)),
   "exgaussian" = list(c(0.1, 0.1), c(0.1, 0.1), c(-0.1, -0.1)),
   "gumbel" = list(NA, c(-4, -4), c(0.5, 0.5)),
@@ -229,10 +142,10 @@ z1z2_y_unbiased1_list <- list(
 )
 
 x_y_unbiased1_list <- list(
-  "gaussian"     = c(0.33, 1.3),
-  "student"      = c(0.37, 2.2),
-  "skew_normal"  = c(0.337, 1.19, 0.368),
-  "generalized_normal" = c(0.1, 1.6),
+  "gaussian"     = c(2.5, 3.1),
+  "student"      = c(1.15, 3.2),
+  "skew_normal"  = c(0.7, 1.15, 1.7),
+  "generalized_normal" = c(1, 2),
   "asym_laplace" = c(0.5, 1.2, 0.65),
   "exgaussian"   = c(0.5,  3,   0.55),
   "gumbel"       = c(NA,  1.6, 0.6),
@@ -284,10 +197,10 @@ data_config_unbiased1$id <- as.numeric(
 ```{r}
 fit_config_unbiased1 <- expand.grid(
   fit_family = c(
-    "gaussian"#, # FPR passt
-    # "student", # FPR passt
-    # "skew_normal", # FPR thin too high
-    # "generalized_normal", # FPR thin too low
+    # "gaussian"#, # FPR passt
+    # "student"#, # FPR passt
+    # "skew_normal"#, # FPR thin too high
+    "generalized_normal"#, # FPR thin too low
     # "asym_laplace", # FPR skewed is wonky!
     # "exgaussian"#, # FPR skewed good. Anything else does not work well at all
     # "gumbel", # FPR skewed ok, wide is too low
