@@ -230,7 +230,7 @@ z1z2_y_list <- list(
 )
 
 x_y_list <- list(
-  "gaussian"     = c(0.45, 2),
+  "gaussian"     = c(0.3, 1.2),
   "student"      = c(0.37, 2.2),
   "skew_normal"  = c(0.337, 1.19, 0.368),
   "generalized_normal" = c(0.1, 1.6),
@@ -244,6 +244,8 @@ x_y_list <- list(
 
 z1z3_x_list <- list(
   "gaussian" = list(c(1, 0.3), c(1, 0.3)),
+  # "gaussian" = list(c(0.1, 0.3), c(0.1, 0.3)),
+  # "gaussian" = list(c(0.15, 0.1), c(0.3, 0.1)), #bias2 nice
   "student" = list(c(0.5, 1), c(0.5, 1)),
   "skew_normal" = list(c(0.5, 1), c(0.5, 1), c(-1, 1)), #skewed FPR too low
   "generalized_normal" = list(c(0.5, 1), c(0.5, 1)),
@@ -256,7 +258,9 @@ z1z3_x_list <- list(
 
 # first entry x_z4, second y_z4
 x_y_z4_list <- list(
-  "gaussian" = list(c(0.1, 0.1), c(0.1, 0.1)),
+  # "gaussian" = list(c(0.05, 0.05), c(0.05, 0.05)),#bias2 nice
+  # "gaussian" = list(c(0.05, 0.05), c(0.2, 0.2)),#
+  "gaussian" = list(c(0.5, 0.5), c(0.5, 0.5)),
   "student" = list(c(1, 1), c(1, 1)),
   "skew_normal" = list(c(1, 1), c(1, 1), c(1, 1)), #skewed FPR too low
   "generalized_normal" = list(c(1, 1), c(1, 1)),
@@ -370,7 +374,8 @@ result_df <- full_simulation(
   calibration_mode = TRUE,
   time_info = TRUE,
   vars_of_interest = VARS_OF_INTEREST,
-  quantiles = QUANTILES
+  quantiles = QUANTILES,
+  model_compile_dir = "~/Dokumente/simmodels"
 )
 
 end_time <- Sys.time()
