@@ -128,7 +128,7 @@ family_filter <- function(table, family_vector, filter_shape) {
 
 ```{r}
 RESULT_PATH <- NULL #"~/Dokumente/simresults"
-NCORES <- 3 # physical cores -1 or less
+NCORES <- 5 # physical cores -1 or less
 CLUSTER_TYPE <- "FORK" # or PSOCK if you have Windows
 SEED <- 1339
 set.seed(SEED)
@@ -245,7 +245,7 @@ x_y_list <- list(
 
 z1z3_x_list <- list(
   # "gaussian" = list(c(1, 0.3), c(1, 0.3)), # low FPR biased
-  "gaussian" = list(c(0.3, 0.3), c(0.3, 0.3)),
+  "gaussian" = list(c(0.03, 0.03), c(0.3, 0.3)),
   # "student" = list(c(0.05, 0.1), c(0.05, 0.1)),
   #"student" = list(c(0.05, 0.5), c(0.05, 0.5)),#works ok, unbiased1 and biased FPR too low
   "student" = list(c(0.1, 0.5), c(0.1, 0.5)),
@@ -260,7 +260,7 @@ z1z3_x_list <- list(
 
 # first entry x_z4, second y_z4
 x_y_z4_list <- list(
-  "gaussian" = list(c(0.01, 0.01), c(0.01, 0.01)),
+  "gaussian" = list(c(0.1, 0.1), c(0.01, 0.01)),
   # "student" = list(c(0.3, 0.3), c(0.3, 0.3)),#too high biased FPR
   "student" = list(c(0.1, 0.1), c(0.1, 0.1)),
   "skew_normal" = list(c(1, 1), c(1, 1), c(1, 1)), #skewed FPR too low
@@ -322,8 +322,8 @@ data_config$id <- as.numeric(
 ```{r}
 fit_config <- expand.grid(
   fit_family = c(
-    # "gaussian"#, # FPR passt
-    "student"#, # FPR passt
+    "gaussian"#, # FPR passt
+    # "student"#, # FPR passt
     # "skew_normal", # FPR thin too high
     # "generalized_normal", # FPR thin too low
     # "asym_laplace", # FPR skewed is wonky!
@@ -375,7 +375,8 @@ result_df <- full_simulation(
   calibration_mode = TRUE,
   time_info = TRUE,
   vars_of_interest = VARS_OF_INTEREST,
-  quantiles = QUANTILES
+  quantiles = QUANTILES,
+  model_compile_dir = "~/Dokumente/simmodels"
 )
 
 end_time <- Sys.time()
