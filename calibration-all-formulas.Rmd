@@ -213,8 +213,8 @@ data_config <- expand.grid(
 
 skew_filter <- c("gaussian", "student", "generalized_normal", "logistic")
 data_config <- family_filter(data_config, skew_filter, "skewed")
-thin_filter <- c("gumbel")#, "exgaussian") # exgauss does not do wide well at all
-data_config <- family_filter(data_config, thin_filter, "thin")
+# thin_filter <- c("gumbel")#, "exgaussian") # exgauss does not do wide well at all
+data_config <- family_filter(data_config, "gumbel", "thin")
 data_config <- family_filter(data_config, "exgaussian", "wide")
 
 z1z2_y_list <- list(
@@ -248,7 +248,8 @@ x_y_list <- list(
 z1z3_x_list <- list(
   # "gaussian" = list(c(0.1, 0.1), c(0.3, 0.45)),# nice
   # "gaussian" = list(c(0.15, 0.1), c(0.45, 0.45)),# also nice
-  "gaussian" = list(c(0.15, 0.15), c(0.45, 0.45)),
+  # "gaussian" = list(c(0.15, 0.15), c(0.45, 0.45)),
+  "gaussian" = list(c(0.15, 0.15), c(0.03, 0.3)),
   # "student" = list(c(0.05, 0.1), c(0.05, 0.1)),
   #"student" = list(c(0.05, 0.5), c(0.05, 0.5)),#works ok, unbiased1 and biased FPR too low
   # "student" = list(c(0.1, 0.5), c(0.1, 0.5)),
