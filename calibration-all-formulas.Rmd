@@ -244,8 +244,9 @@ x_y_list <- list(
 )
 
 z1z3_x_list <- list(
-  # "gaussian" = list(c(1, 0.3), c(1, 0.3)), # low FPR biased
-  "gaussian" = list(c(0.03, 0.03), c(0.3, 0.3)),
+  # "gaussian" = list(c(0.1, 0.1), c(0.3, 0.45)),# nice
+  # "gaussian" = list(c(0.15, 0.1), c(0.45, 0.45)),# also nice
+  "gaussian" = list(c(0.15, 0.15), c(0.45, 0.45)),
   # "student" = list(c(0.05, 0.1), c(0.05, 0.1)),
   #"student" = list(c(0.05, 0.5), c(0.05, 0.5)),#works ok, unbiased1 and biased FPR too low
   "student" = list(c(0.1, 0.5), c(0.1, 0.5)),
@@ -260,7 +261,9 @@ z1z3_x_list <- list(
 
 # first entry x_z4, second y_z4
 x_y_z4_list <- list(
-  "gaussian" = list(c(0.1, 0.1), c(0.01, 0.01)),
+  # "gaussian" = list(c(0.1, 0.1), c(0.01, 0.01)),
+  # "gaussian" = list(c(0.16, 0.16), c(0.06, 0.06)),#nice
+  "gaussian" = list(c(0.16, 0.16), c(0.09, 0.06)),
   # "student" = list(c(0.3, 0.3), c(0.3, 0.3)),#too high biased FPR
   "student" = list(c(0.1, 0.1), c(0.1, 0.1)),
   "skew_normal" = list(c(1, 1), c(1, 1), c(1, 1)), #skewed FPR too low
@@ -393,7 +396,7 @@ p1 <- result_df %>%
   filter(ess_bulk_b_x > 400) %>%
   filter(ess_tail_b_x > 400) %>%
   mutate(sig95 = as.numeric(b_x_2_5pq > 0 | b_x_97_5pq < 0),
-         zero_effect = ifelse(x_y_coef == 0, "FPR", "Power")) %>%
+         zero_effect = ifelse(x_y_coef == 0, "FPR", "TPR")) %>%
   group_by(across(all_of(cols))) %>%
   #summarise(sig95 = mean(1 - sig95)) %>%
   summarise(sig95 = mean(sig95)) %>%
