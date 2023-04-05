@@ -135,7 +135,7 @@ set.seed(SEED)
 options(error = recover) # for easier debugging
 DEBUG <- FALSE # unless you want every single simulation step written to disk
 
-DATASET_N <- 20 # 5-10-ish for calibration, 200 for the final experiment
+DATASET_N <- 10 # 5-10-ish for calibration, 200 for the final experiment
 
 stan_pars <- list(
   backend = "rstan",
@@ -213,12 +213,14 @@ data_config <- expand.grid(
 
 skew_filter <- c("gaussian", "student", "generalized_normal", "logistic")
 data_config <- family_filter(data_config, skew_filter, "skewed")
-thin_filter <- c("gumbel")#, "exgaussian") # exgauss does not do wide well at all
-data_config <- family_filter(data_config, thin_filter, "thin")
+# thin_filter <- c("gumbel")#, "exgaussian") # exgauss does not do wide well at all
+data_config <- family_filter(data_config, "gumbel", "thin")
 data_config <- family_filter(data_config, "exgaussian", "wide")
 
 z1z2_y_list <- list(
-  "gaussian" = list(c(0.5, 0.5), c(1, 1)),
+  # "gaussian" = list(c(0.5, 0.5), c(1, 1)),
+  "gaussian" = list(c(0.5, 0.5), c(0.01, 1)),
+  # "gaussian" = list(c(0.5, 0.5), c(0.1, 2)),
   # "student" = list(c(-2, -2), c(-3, -3)), #works ok, unbiased1 and biased too low FPR
   "student" = list(c(4, -2), c(-4, -3)),
   "skew_normal" = list(c(-0.1, 0.1), c(-0.1, -0.1), c(-1, 1)), #skewed FPR too low
@@ -231,7 +233,8 @@ z1z2_y_list <- list(
 )
 
 x_y_list <- list(
-  "gaussian"     = c(0.45, 2),
+  # "gaussian"     = c(0.45, 2),# maybe increase, as soon, as TPR reducing unbiased2 is found!
+   "gaussian"     = c(0.45, 1.8),
   "student"      = c(0.5, 2.5),
   "skew_normal"  = c(0.337, 1.19, 0.368),
   "generalized_normal" = c(0.1, 1.6),
@@ -246,7 +249,8 @@ x_y_list <- list(
 z1z3_x_list <- list(
   # "gaussian" = list(c(0.1, 0.1), c(0.3, 0.45)),# nice
   # "gaussian" = list(c(0.15, 0.1), c(0.45, 0.45)),# also nice
-  "gaussian" = list(c(0.15, 0.15), c(0.45, 0.45)),
+  # "gaussian" = list(c(0.15, 0.15), c(0.45, 0.45)),
+  "gaussian" = list(c(0.15, 0.15), c(0.03, 0.3)),
   # "student" = list(c(0.05, 0.1), c(0.05, 0.1)),
   #"student" = list(c(0.05, 0.5), c(0.05, 0.5)),#works ok, unbiased1 and biased FPR too low
   "student" = list(c(0.1, 0.5), c(0.1, 0.5)),
@@ -369,7 +373,7 @@ result_df <- full_simulation(
   data_gen_fun = basedag_data,
   fit_confs = fit_config,
   metrics = metrics,
-  ncores_simulation = 1,
+  ncores_simulation = NCORES,
   cluster_type = CLUSTER_TYPE,
   stan_pars = stan_pars,
   seed = SEED,
