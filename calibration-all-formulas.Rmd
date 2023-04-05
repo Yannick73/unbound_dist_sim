@@ -128,14 +128,14 @@ family_filter <- function(table, family_vector, filter_shape) {
 
 ```{r}
 RESULT_PATH <- NULL #"~/Dokumente/simresults"
-NCORES <- 5 # physical cores -1 or less
+NCORES <- 2 # physical cores -1 or less
 CLUSTER_TYPE <- "FORK" # or PSOCK if you have Windows
 SEED <- 1339
 set.seed(SEED)
 options(error = recover) # for easier debugging
 DEBUG <- FALSE # unless you want every single simulation step written to disk
 
-DATASET_N <- 10 # 5-10-ish for calibration, 200 for the final experiment
+DATASET_N <- 20 # 5-10-ish for calibration, 200 for the final experiment
 
 stan_pars <- list(
   backend = "rstan",
@@ -219,7 +219,7 @@ data_config <- family_filter(data_config, "exgaussian", "wide")
 
 z1z2_y_list <- list(
   # "gaussian" = list(c(0.5, 0.5), c(1, 1)),
-  "gaussian" = list(c(0.5, 0.5), c(0.01, 1)),
+  "gaussian" = list(c(0.5, 0.5), c(0.01, 0.05)),
   # "gaussian" = list(c(0.5, 0.5), c(0.1, 2)),
   # "student" = list(c(-2, -2), c(-3, -3)), #works ok, unbiased1 and biased too low FPR
   "student" = list(c(4, -2), c(-4, -3)),
@@ -234,7 +234,7 @@ z1z2_y_list <- list(
 
 x_y_list <- list(
   # "gaussian"     = c(0.45, 2),# maybe increase, as soon, as TPR reducing unbiased2 is found!
-   "gaussian"     = c(0.45, 1.8),
+   "gaussian"     = c(0.45, 2.2),
   "student"      = c(0.5, 2.5),
   "skew_normal"  = c(0.337, 1.19, 0.368),
   "generalized_normal" = c(0.1, 1.6),
