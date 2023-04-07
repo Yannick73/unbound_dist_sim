@@ -128,11 +128,7 @@ family_filter <- function(table, family_vector, filter_shape) {
 
 ```{r}
 RESULT_PATH <- NULL #"~/Dokumente/simresults"
-<<<<<<< HEAD
 NCORES <- 6 # physical cores -1 or less
-=======
-NCORES <- 4 # physical cores -1 or less
->>>>>>> 45d5e125a9d770cb3b111992425a7f509a834841
 CLUSTER_TYPE <- "FORK" # or PSOCK if you have Windows
 SEED <- 1339
 set.seed(SEED)
@@ -222,13 +218,8 @@ data_config <- family_filter(data_config, "gumbel", "thin")
 data_config <- family_filter(data_config, "exgaussian", "wide")
 
 z1z2_y_list <- list(
-<<<<<<< HEAD
-  # "gaussian" = list(c(0.5, 0.5), c(0.01, 0.05)),
-  # "gaussian" = list(c(-0.06, 0.03), c(-0.06, 0.03)),
   "gaussian" = list(c(0.1, -0.1), c(0.1, 0.1)),
-=======
-  "gaussian" = list(c(0.5, 0.5), c(0.3, 0.5)),
->>>>>>> 45d5e125a9d770cb3b111992425a7f509a834841
+  # "gaussian" = list(c(0.5, 0.5), c(0.3, 0.5)),
   # "student" = list(c(-2, -2), c(-3, -3)), #works ok, unbiased1 and biased too low FPR
   # "student" = list(c(4, -2), c(-4, -3)),
   "student" = list(c(-0.2, 0.1), c(-0.2, 0.1)),
@@ -242,13 +233,7 @@ z1z2_y_list <- list(
 )
 
 x_y_list <- list(
-<<<<<<< HEAD
-  # "gaussian"     = c(0.45, 2),# maybe increase, as soon, as TPR reducing unbiased2 is found!
-   "gaussian"     = c(0.45, 2),
-=======
   "gaussian"     = c(0.45, 2),
-  # "student"      = c(0.5, 1.2),
->>>>>>> 45d5e125a9d770cb3b111992425a7f509a834841
   "student"      = c(0.5, 2.5),
   "skew_normal"  = c(0.337, 1.19, 0.368),
   "generalized_normal" = c(0.1, 1.6),
