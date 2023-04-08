@@ -22,6 +22,8 @@ library(patchwork)
 library(ggplot2)
 library(ggthemes)
 set.seed(1235813)
+
+# unix::rlimit_as(1.2e12)  #increases to ~12GB
 ```
 
 ```{r}
@@ -128,14 +130,14 @@ family_filter <- function(table, family_vector, filter_shape) {
 
 ```{r}
 RESULT_PATH <- NULL #"~/Dokumente/simresults"
-NCORES <- 6 # physical cores -1 or less
+NCORES <- 1 # physical cores -1 or less
 CLUSTER_TYPE <- "FORK" # or PSOCK if you have Windows
 SEED <- 1339
 set.seed(SEED)
 # options(error = recover) # for easier debugging
 DEBUG <- FALSE # unless you want every single simulation step written to disk
 
-DATASET_N <- 20 # 5-10-ish for calibration, 200 for the final experiment
+DATASET_N <-50 # 5-10-ish for calibration, 200 for the final experiment
 
 stan_pars <- list(
   backend = "rstan",
@@ -223,7 +225,7 @@ z1z2_y_list <- list(
   # "student" = list(c(-2, -2), c(-3, -3)), #works ok, unbiased1 and biased too low FPR
   # "student" = list(c(4, -2), c(-4, -3)),
   "student" = list(c(-0.2, 0.1), c(-0.2, 0.1)),
-  "skew_normal" = list(c(-0.1, 0.1), c(-0.1, -0.1), c(-1, 1)), #skewed FPR too low
+  "skew_normal" = list(c(0.05, 0.3), c(0.05, 0.1), c(0.05, 0.3)), #skewed FPR too low
   "generalized_normal" = list(c(-0.5, -0.5), c(-2, -2)),
   "asym_laplace" = list(c(12, -6), c(-0.5, -0.5), c(1, 1)),
   "exgaussian" = list(c(0.1, 0.1), NA, c(-0.1, -0.1)),
@@ -235,7 +237,7 @@ z1z2_y_list <- list(
 x_y_list <- list(
   "gaussian"     = c(0.45, 2),
   "student"      = c(0.5, 2.5),
-  "skew_normal"  = c(0.337, 1.19, 0.368),
+  "skew_normal"  = c(0.45, 1.6, 0.5),
   "generalized_normal" = c(0.1, 1.6),
   "asym_laplace" = c(0.5, 1.2, 0.65),
   "exgaussian"   = c(0.5,  NA,   0.55),
@@ -252,7 +254,7 @@ z1z3_x_list <- list(
   #"student" = list(c(0.05, 0.5), c(0.05, 0.5)),#works ok, unbiased1 and biased FPR too low
   # "student" = list(c(0.1, 0.5), c(0.1, 0.5)),
   "student" = list(c(0.1, 0.2), c(0.1, 0.2)),
-  "skew_normal" = list(c(0.5, 1), c(0.5, 1), c(-1, 1)), #skewed FPR too low
+  "skew_normal" = list(c(0.1, 0.1), c(0.03, 0.1), c(0.06, 0.1)), #skewed FPR too low
   "generalized_normal" = list(c(0.5, 1), c(0.5, 1)),
   "asym_laplace" = list(c(0.5, 1), c(0.5, 1), c(1, 1)),
   "exgaussian" = list(c(0.5, 1), NA, c(0.5, 1)),
@@ -266,7 +268,7 @@ x_y_z4_list <- list(
   "gaussian" = list(c(0.15, 0.20), c(0.08, 0.07)),
   # "student" = list(c(0.3, 0.3), c(0.3, 0.3)),#too high biased FPR
   "student" = list(c(0.1, 0.1), c(0.01, 0.01)),
-  "skew_normal" = list(c(1, 1), c(1, 1), c(1, 1)), #skewed FPR too low
+  "skew_normal" = list(c(0.1, 0.1), c(0.03, 0.01), c(0.05, 0.05)), #skewed FPR too low
   "generalized_normal" = list(c(1, 1), c(1, 1)),
   "asym_laplace" = list(c(1, 1), c(1, 1), c(1, 1)),
   "exgaussian" = list(c(1, 1), NA, c(1, 1)),
@@ -325,10 +327,10 @@ data_config$id <- as.numeric(
 ```{r}
 fit_config <- expand.grid(
   fit_family = c(
-    # "gaussian"#, # FPR passt
-    "student"#, # FPR passt
-    # "skew_normal", # FPR thin too high
-    # "generalized_normal", # FPR thin too low
+    # "gaussian", # FPR passt
+    # "student"#, # FPR passt
+    "skew_normal"#, # FPR thin too high
+    # "generalized_normal"#, # FPR thin too low
     # "asym_laplace", # FPR skewed is wonky!
     # "exgaussian"#, # FPR skewed good. Anything else does not work well at all
     # "gumbel", # FPR skewed ok, wide is too low
