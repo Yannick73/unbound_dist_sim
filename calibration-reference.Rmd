@@ -268,7 +268,7 @@ ggsave("~/Pictures/dist_overvoew.png", width = 210, height = (297/4)*2.2, units 
 
 ```{r}
 RESULT_PATH <- "~/Dokumente/dr/foo"
-NCORES <- 10 # physical cores -1 or less
+NCORES <- 5 # physical cores -1 or less
 CLUSTER_TYPE <- "FORK" # or PSOCK if you have Windows
 SEED <- 1339
 set.seed(SEED)
