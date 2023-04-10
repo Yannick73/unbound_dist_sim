@@ -13,16 +13,16 @@ col3 <- 'blue'
 print("Showcase of different qualitative continuous unbound distributions")
 ```
 ```{r}
-normal_unchanged <- c(0, 1.2)
-normal_broad <- c(0, 5)
+normal_thin <- c(0, 1)
+normal_wide <- c(0, 5)
 
-plot(x, dnorm(x, normal_unchanged[1], normal_unchanged[2]), type='l', col=col1,
+plot(x, dnorm(x, normal_thin[1], normal_thin[2]), type='l', col=col1,
      ylab='different qualitative normal PDFs')
-lines(x, dnorm(x, normal_broad[1], normal_broad[2]), type='l', col=col2)
+lines(x, dnorm(x, normal_wide[1], normal_wide[2]), type='l', col=col2)
 ```
 ```{r}
-t_thin <- c(0, 2, 1)
-t_wide <- c(0, 2, 5)
+t_thin <- c(0, 5, 0.95)
+t_wide <- c(0, 8, 4.8)
 
 # usually, mu then shape. In dt, it is reversed.
 plot(x, brms::dstudent_t(x, t_thin[2], t_thin[1], t_thin[3]), type='l', 
@@ -33,11 +33,11 @@ lines(x, brms::dstudent_t(x, t_wide[2], t_wide[1], t_wide[3]),
 # vanilla gets skewed for mu != 0, BRMS' does not skew
 ```
 ```{r}
-sn_geometric <- c(0, 1.2, 0)
+sn_thin <- c(0, 1, 0)
 sn_wide <- c(0, 5, 0)
 sn_skewed <- c(-1.5, 2, 10)
 
-plot(x, brms::dskew_normal(x, mu=sn_geometric[1], sigma=sn_geometric[2], alpha=sn_geometric[3]), 
+plot(x, brms::dskew_normal(x, mu=sn_thin[1], sigma=sn_thin[2], alpha=sn_thin[3]), 
      type='l', col=col1, ylab='different qualitative skew-normal PDFs')
 lines(x, brms::dskew_normal(x, mu=sn_skewed[1], sigma=sn_skewed[2], 
                             alpha=sn_skewed[3]), type='l', col=col2)
@@ -45,22 +45,20 @@ lines(x, brms::dskew_normal(x, mu=sn_wide[1], sigma=sn_wide[2],
                             alpha=sn_wide[3]), type='l', col=col3)
 ```
 ```{r}
-gn_thin <- c(0, 1.5, 50) # well, not used edge case
+# gn_thin <- c(0, 1.5, 50) # well, not used edge case
 
-gn_normal <- c(0, 1.5, 2)
-sn_wide <- c(0, 4, 0.8)
+gn_thin <- c(0, 1.4, 2)
+gn_wide <- c(0, 7, 2)
 
-plot(x, dgeneralized_normal(x, mu=gn_normal[1], sigma=gn_normal[2], 
-                            beta=gn_normal[3]), type='l', col=col1, 
+plot(x, dgeneralized_normal(x, mu=gn_thin[1], sigma=gn_thin[2], 
+                            beta=gn_thin[3]), type='l', col=col1, 
                             ylab='different qualitative generalized-normal PDFs')
-lines(x, dgeneralized_normal(x, mu=gn_thin[1], sigma=gn_thin[2], 
-                             beta=gn_thin[3]), type='l', col=col2)
-lines(x, dgeneralized_normal(x, mu=sn_wide[1], sigma=sn_wide[2], 
-                             beta=sn_wide[3]), type='l', col=col3)
+lines(x, dgeneralized_normal(x, mu=gn_wide[1], sigma=gn_wide[2], 
+                             beta=gn_wide[3]), type='l', col=col3)
 ```
 ```{r}
-al_thin <- c(0, 0.8, 0.5)
-al_wide <- c(0, 2, 0.5)
+al_thin <- c(0, 0.5, 0.5)
+al_wide <- c(0, 2.2, 0.5)
 al_skewed <- c(-1.5, 0.4, 0.1)
 
 plot(x, brms::dasym_laplace(x, mu=al_thin[1], sigma=al_thin[2], 
@@ -72,9 +70,9 @@ lines(x, brms::dasym_laplace(x, mu=al_wide[1], sigma=al_wide[2],
                              quantile=al_wide[3]), type='l', col=col3)
 ```
 ```{r}
-exg_thin <- c(0, 1, 0.5)
-exg_wide <- c(0, 6, 0.5)
-exg_skewed <- c(0, 1, 3)
+exg_thin <- c(0, 0.9, 0.5)
+exg_wide <- c(0, 5, 1)
+exg_skewed <- c(-1.5, 0.5, 3)
 
 plot(x, brms::dexgaussian(x, mu=exg_thin[1], sigma=exg_thin[2], 
                           beta=exg_thin[3]), type='l', col=col1, 
@@ -83,17 +81,18 @@ lines(x, brms::dexgaussian(x, mu=exg_skewed[1], sigma=exg_skewed[2],
                           beta=exg_skewed[3]), type='l', col=col2)
 lines(x, brms::dexgaussian(x, mu=exg_wide[1], sigma=exg_wide[2], 
                           beta=exg_wide[3]), type='l', col=col3)
+print("Unfortunately, for any sigma/beta > 2, the recovery gets very bad. So the wide shape cannot be used in sim.")
 ```
 ```{r}
-gumbel_wide <- c(0, 6)
-gumbel_skewed <- c(-1.5, 2)
+gumbel_wide <- c(0, 4.5)
+gumbel_skewed <- c(-1.5, 1.6)
 
 plot(x, dgumbel_mean(x, gumbel_skewed[1], gumbel_skewed[2]), type='l', col=col1,
      ylab='different qualitative gumbel PDFs')
 lines(x, dnorm(x, gumbel_wide[1], gumbel_wide[2]), type='l', col=col2)
 ```
 ```{r}
-logistic_thin <- c(0, 0.8)
+logistic_thin <- c(0, 0.63)
 logistic_wide <- c(0, 3)
 
 plot(x, dlogistic(x, mu = logistic_thin[1], sigma = logistic_thin[2]), 
@@ -103,9 +102,9 @@ lines(x, dlogistic(x, mu = logistic_wide[1], sigma = logistic_wide[2]),
 ```
 
 ```{r}
-sln_thin <- c(0, 1)
-sln_wide <- c(0, 4)
-sln_skewed <- c(1.5, 0.5)  # mode bigger, mode != 0
+sln_thin <- c(0, 0.7)
+sln_wide <- c(0, 2)
+sln_skewed <- c(-1.5, 0.4)  # mode bigger, mode != 0
 
 plot(x, dsymlognormal(x, mu = sln_thin[1], sigma = sln_thin[2]), 
       type = "l", col = col3, ylab='different qualitative symlognormal PDFs')
