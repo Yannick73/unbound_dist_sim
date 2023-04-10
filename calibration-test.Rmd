@@ -129,8 +129,9 @@ family_filter <- function(table, family_vector, filter_shape) {
 # Sim Setup
 
 ```{r}
-RESULT_PATH <- NULL #"~/Dokumente/simresults"
-NCORES <- 10 # physical cores -1 or less
+# RESULT_PATH <- NULL #"~/Dokumente/simresults"
+RESULT_PATH <- "~/Dokumente/simresults"
+NCORES <- 3 # physical cores -1 or less
 # CLUSTER_TYPE <- "FORK" # or PSOCK if you have Windows
 CLUSTER_TYPE <- "PSOCK"
 SEED <- 1339
@@ -138,7 +139,7 @@ set.seed(SEED)
 options(error = recover) # for easier debugging
 DEBUG <- FALSE # unless you want every single simulation step written to disk
 
-DATASET_N <- 10 # 5-10-ish for calibration, 200 for the final experiment
+DATASET_N <- 200 # 5-10-ish for calibration, 200 for the final experiment
 
 stan_pars <- list(
   backend = "rstan",
@@ -169,12 +170,12 @@ QUANTILES = list(list(c(0.025, 0.975)))
 
 ```{r}
 data_config <- expand.grid(
-  z1_x_coef = NA, # 0.5
-  z1_y_coef = NA, # 2
-  z2_y_coef = NA, # 2
-  z3_x_coef = NA, # 1
-  x_z4_coef = NA, # 1
-  y_z4_coef = NA, # 1
+  z1_x_coef = 0.1, # 0.5
+  z1_y_coef = 0.1, # 2
+  z2_y_coef = 0.2, # 2
+  z3_x_coef = 0.2, # 1
+  x_z4_coef = 0.05, # 1
+  y_z4_coef = 0.05, # 1
   sigma_z1 = 2,
   sigma_z2 = 2,
   sigma_z3 = 1,
@@ -216,53 +217,59 @@ data_config <- family_filter(data_config, skew_filter, "skewed")
 data_config <- family_filter(data_config, "gumbel", "thin")
 data_config <- family_filter(data_config, "exgaussian", "wide")
 
-z1z2_y_list <- list(
-  "gaussian" = list(c(0.1, -0.1), c(0.1, 0.1)),
-  "student" = list(c(-0.2, 0.1), c(-0.2, 0.1)),
-  "skew_normal" = list(c(0.02, 0.2), c(0.05, 0.2), c(0.08, 0.2)),
-  "generalized_normal" = list(c(0.02, 0.1), c(0.1, 0.05)),
-  "asym_laplace" = list(c(0.05, 0.2), c(0.05, 0.2), c(0.05, 0.1)),
-  "exgaussian" = list(c(0.1, 0.1), NA, c(-0.1, -0.1)),
-  "gumbel" = list(NA, c(-4, -4), c(0.5, 0.5)),
-  "logistic" = list(c(-3, -3), c(9, 9)),
-  "symlognormal" = list(c(3, 3), c(3, 3), c(1, 1))
-)
+# z1z2_y_list <- list(
+#   "gaussian" = list(c(0.1, -0.1), c(0.1, 0.1)),
+#   "student" = list(c(-0.2, 0.1), c(-0.2, 0.1)),
+#   "skew_normal" = list(c(0.02, 0.2), c(0.05, 0.2), c(0.08, 0.2)),
+#   "generalized_normal" = list(c(0.02, 0.1), c(0.1, 0.05)),
+#   "asym_laplace" = list(c(0.05, 0.2), c(0.05, 0.2), c(0.05, 0.1)),
+#   "exgaussian" = list(c(0.1, 0.1), NA, c(-0.1, -0.1)),
+#   "gumbel" = list(NA, c(-4, -4), c(0.5, 0.5)),
+#   "logistic" = list(c(-3, -3), c(9, 9)),
+#   "symlognormal" = list(c(3, 3), c(3, 3), c(1, 1))
+# )
+# 
+# x_y_list <- list(
+#   "gaussian"     = c(0.45, 2),
+#   "student"      = c(0.5, 2.5),
+#   "skew_normal"  = c(0.45, 1.6, 0.5),
+#   "generalized_normal" = c(0.14, 2.6),
+#   "asym_laplace" = c(0.7, 1.5, 0.75),
+#   "exgaussian"   = c(0.5,  NA,   0.55),
+#   "gumbel"       = c(NA,  1.6, 0.6),
+#   "logistic"     = c(0.38, 1.2),
+#   "symlognormal" = c(0.27, 1.1, 0.14)
+# )
+# 
+# z1z3_x_list <- list(
+#   "gaussian" = list(c(0.1, 0.1), c(0.1, 0.3)),
+#   "student" = list(c(0.1, 0.2), c(0.1, 0.2)),
+#   "skew_normal" = list(c(0.05, 0.05), c(0.03, 0.1), c(0.1, 0.1)),
+#   "generalized_normal" = list(c(0.01, 0.1), c(0.01, 0.1)),
+#   "asym_laplace" = list(c(0.05, 0.1), c(0.05, 0.1), c(0.1, 0.1)),
+#   "exgaussian" = list(c(0.5, 1), NA, c(0.5, 1)),
+#   "gumbel" = list(NA, c(0.5, 1), c(0.5, 1)),
+#   "logistic" = list(c(0.5, 1), c(0.5, 1)),
+#   "symlognormal" = list(c(0.5, 1), c(0.5, 1), c(1, 1))
+# )
+# 
+# # first entry x_z4, second y_z4
+# x_y_z4_list <- list(
+#   "gaussian" = list(c(0.15, 0.20), c(0.08, 0.07)),
+#   "student" = list(c(0.1, 0.1), c(0.01, 0.01)),
+#   "skew_normal" = list(c(0.1, 0.2), c(0.03, 0.02), c(0.05, 0.1)),
+#   "generalized_normal" = list(c(0.3, 0.15), c(0.08, 0.02)),
+#   "asym_laplace" = list(c(0.05, 0.1), c(0.02, 0.02), c(0.05, 0.1)),
+#   "exgaussian" = list(c(1, 1), NA, c(1, 1)),
+#   "gumbel" = list(NA, c(1, 1), c(1, 1)),
+#   "logistic" = list(c(1, 1), c(1, 1)),
+#   "symlognormal" = list(c(1, 1), c(1, 1), c(1, 1))
+# )
 
 x_y_list <- list(
-  "gaussian"     = c(0.45, 2),
-  "student"      = c(0.5, 2.5),
-  "skew_normal"  = c(0.45, 1.6, 0.5),
-  "generalized_normal" = c(0.14, 2.6),
-  "asym_laplace" = c(0.7, 1.5, 0.75),
-  "exgaussian"   = c(0.5,  NA,   0.55),
-  "gumbel"       = c(NA,  1.6, 0.6),
-  "logistic"     = c(0.38, 1.2),
-  "symlognormal" = c(0.27, 1.1, 0.14)
-)
-
-z1z3_x_list <- list(
-  "gaussian" = list(c(0.1, 0.1), c(0.1, 0.3)),
-  "student" = list(c(0.1, 0.2), c(0.1, 0.2)),
-  "skew_normal" = list(c(0.05, 0.05), c(0.03, 0.1), c(0.1, 0.1)),
-  "generalized_normal" = list(c(0.01, 0.1), c(0.01, 0.1)),
-  "asym_laplace" = list(c(0.05, 0.1), c(0.05, 0.1), c(0.1, 0.1)),
-  "exgaussian" = list(c(0.5, 1), NA, c(0.5, 1)),
-  "gumbel" = list(NA, c(0.5, 1), c(0.5, 1)),
-  "logistic" = list(c(0.5, 1), c(0.5, 1)),
-  "symlognormal" = list(c(0.5, 1), c(0.5, 1), c(1, 1))
-)
-
-# first entry x_z4, second y_z4
-x_y_z4_list <- list(
-  "gaussian" = list(c(0.15, 0.20), c(0.08, 0.07)),
-  "student" = list(c(0.1, 0.1), c(0.01, 0.01)),
-  "skew_normal" = list(c(0.1, 0.2), c(0.03, 0.02), c(0.05, 0.1)),
-  "generalized_normal" = list(c(0.3, 0.15), c(0.08, 0.02)),
-  "asym_laplace" = list(c(0.05, 0.1), c(0.02, 0.02), c(0.05, 0.1)),
-  "exgaussian" = list(c(1, 1), NA, c(1, 1)),
-  "gumbel" = list(NA, c(1, 1), c(1, 1)),
-  "logistic" = list(c(1, 1), c(1, 1)),
-  "symlognormal" = list(c(1, 1), c(1, 1), c(1, 1))
+  "thin"     = 0.5,
+  "wide"      = 2,
+  "skewed"  = 0.5
 )
 
 
@@ -289,19 +296,25 @@ for (i in seq_len(nrow(data_config))) {
   shape_name <- data_config$shape[[i]]
   shape_index <- shape_index_lookup[[shape_name]]
   
-  data_config$z1_y_coef[[i]] <- z1z2_y_list[[family]][[shape_index]][1]
-  data_config$z2_y_coef[[i]] <- z1z2_y_list[[family]][[shape_index]][2]
-  
-  data_config$z1_x_coef[[i]] <- z1z3_x_list[[family]][[shape_index]][1]
-  data_config$z3_x_coef[[i]] <- z1z3_x_list[[family]][[shape_index]][2]
-  
-  data_config$x_z4_coef[[i]] <- x_y_z4_list[[family]][[shape_index]][1]
-  data_config$y_z4_coef[[i]] <- x_y_z4_list[[family]][[shape_index]][2]
+  # data_config$z1_y_coef[[i]] <- z1z2_y_list[[family]][[shape_index]][1]
+  # data_config$z2_y_coef[[i]] <- z1z2_y_list[[family]][[shape_index]][2]
+  # 
+  # data_config$z1_x_coef[[i]] <- z1z3_x_list[[family]][[shape_index]][1]
+  # data_config$z3_x_coef[[i]] <- z1z3_x_list[[family]][[shape_index]][2]
+  # 
+  # data_config$x_z4_coef[[i]] <- x_y_z4_list[[family]][[shape_index]][1]
+  # data_config$y_z4_coef[[i]] <- x_y_z4_list[[family]][[shape_index]][2]
   
   data_config$sigma_y[[i]] <- sigma_y_list[[family]][[shape_index]]
   data_config$y_intercept[[i]] <- y_intercept_list[[shape_index]]
   if(is.na(data_config$x_y_coef[[i]])) {
-    data_config$x_y_coef[[i]] <- x_y_list[[family]][[shape_index]]
+    # data_config$x_y_coef[[i]] <- x_y_list[[family]][[shape_index]]
+    if(family == "symlognormal") {
+      data_config$x_y_coef[[i]] <- x_y_list[[shape_index]] * 0.7
+    }
+    else {
+      data_config$x_y_coef[[i]] <- x_y_list[[shape_index]]
+    }
   }
 }
 
@@ -315,15 +328,15 @@ data_config$id <- as.numeric(
 ```{r}
 fit_config <- expand.grid(
   fit_family = c(
-    # "gaussian",
-    # "student",
-    # "skew_normal",
-    # "generalized_normal",
-    "asym_laplace"#,
-    # "exgaussian"#, # FPR skewed good. Anything else does not work well at all
-    # "gumbel", # FPR skewed ok, wide is too low
-    # "logistic", # FPR ok, thin in z1z2 1.9 too low and 2 is too high
-    # "symlognormal"
+    "gaussian",
+    "student",
+    "skew_normal",
+    "generalized_normal",
+    "asym_laplace",
+    "exgaussian", # FPR skewed good. Anything else does not work well at all
+    "gumbel", # FPR skewed ok, wide is too low
+    "logistic", # FPR ok, thin in z1z2 1.9 too low and 2 is too high
+    "symlognormal"
   ),
   fit_link = c(
     "identity"
