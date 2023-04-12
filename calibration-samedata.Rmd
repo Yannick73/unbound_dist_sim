@@ -127,8 +127,8 @@ family_filter <- function(table, family_vector, filter_shape) {
 # Sim Setup
 
 ```{r}
-# RESULT_PATH <- NULL #"~/Dokumente/simresults"
-RESULT_PATH <- "~/Dokumente/simresults"
+RESULT_PATH <- NULL #"~/Dokumente/simresults"
+# RESULT_PATH <- "~/Dokumente/simresults"
 NCORES <- 3 # physical cores -1 or less
 # CLUSTER_TYPE <- "FORK" # or PSOCK if you have Windows
 CLUSTER_TYPE <- "PSOCK"
@@ -137,7 +137,7 @@ set.seed(SEED)
 options(error = recover) # for easier debugging
 DEBUG <- FALSE # unless you want every single simulation step written to disk
 
-DATASET_N <- 50 # 5-10-ish for calibration, 200 for the final experiment
+DATASET_N <- 20 # 5-10-ish for calibration, 200 for the final experiment
 
 stan_pars <- list(
   backend = "rstan",
@@ -168,16 +168,16 @@ QUANTILES = list(list(c(0.025, 0.975)))
 
 ```{r}
 data_config <- expand.grid(
-  z1_x_coef = 0.1, # 0.5
-  z1_y_coef = 0.1, # 2
-  z2_y_coef = 0.2, # 2
-  z3_x_coef = 0.2, # 1
-  x_z4_coef = 0.05, # 1
-  y_z4_coef = 0.05, # 1
-  sigma_z1 = 2,
-  sigma_z2 = 2,
+  z1_x_coef = NA, # 0.5
+  z1_y_coef = NA, # 2
+  z2_y_coef = NA, # 2
+  z3_x_coef = NA, # 1
+  x_z4_coef = NA, # 1
+  y_z4_coef = NA, # 1
+  sigma_z1 = 1,
+  sigma_z2 = 1,
   sigma_z3 = 1,
-  sigma_z4 = 0.5,
+  sigma_z4 = 1,
   sigma_x = 1,
   data_N = 100,
   dataset_N = DATASET_N,
@@ -215,11 +215,13 @@ data_config <- family_filter(data_config, skew_filter, "skewed")
 data_config <- family_filter(data_config, "gumbel", "thin")
 data_config <- family_filter(data_config, "exgaussian", "wide")
 
-x_y_list <- list(
-  "thin"     = 0.45,
-  "wide"      = 2,
-  "skewed"  = 0.5
-)
+z1_x_vec <- c(-0.5, -0.5, -0.6)
+z1_y_vec <- c(0.2, 0.2, 0.2)
+z2_y_vec <- c(0.05, 0.05, 0.05)
+z3_x_vec <- c(0.2, 0.2, 0.2)
+x_z4_vec <- c(0.1, 0.1, 0.1)
+y_z4_vec <- c(0.1, 0.1, 0.1)
+x_y_vec  <- c(0.4, 1.5, 0.5)
 
 
 
@@ -237,7 +239,7 @@ sigma_y_list <- list(
   "symlognormal" = c(0.7, 2, 0.5)
 )
 # y_intercept is always the same!
-y_intercept_list <- c(0, 0, -1.5)
+y_intercept_vec <- c(0, 0, -1.5)
 shape_index_lookup <- list("thin" = 1, "wide" = 2, "skewed" = 3)
 
 for (i in seq_len(nrow(data_config))) {
@@ -245,26 +247,19 @@ for (i in seq_len(nrow(data_config))) {
   shape_name <- data_config$shape[[i]]
   shape_index <- shape_index_lookup[[shape_name]]
   
-  # data_config$z1_y_coef[[i]] <- z1z2_y_list[[family]][[shape_index]][1]
-  # data_config$z2_y_coef[[i]] <- z1z2_y_list[[family]][[shape_index]][2]
-  # 
-  # data_config$z1_x_coef[[i]] <- z1z3_x_list[[family]][[shape_index]][1]
-  # data_config$z3_x_coef[[i]] <- z1z3_x_list[[family]][[shape_index]][2]
-  # 
-  # data_config$x_z4_coef[[i]] <- x_y_z4_list[[family]][[shape_index]][1]
-  # data_config$y_z4_coef[[i]] <- x_y_z4_list[[family]][[shape_index]][2]
+  data_config$z1_x_coef[[i]] <- z1_x_vec[shape_index]
+  data_config$z1_y_coef[[i]] <- z1_y_vec[shape_index]
+  data_config$z2_y_coef[[i]] <- z2_y_vec[shape_index]
+  data_config$z3_x_coef[[i]] <- z3_x_vec[shape_index]
+  data_config$x_z4_coef[[i]] <- x_z4_vec[shape_index]
+  data_config$y_z4_coef[[i]] <- y_z4_vec[shape_index]
+  
+  if(is.na(data_config$x_y_coef[[i]])) {
+    data_config$x_y_coef[[i]] <- x_y_vec[shape_index]
+  }
   
   data_config$sigma_y[[i]] <- sigma_y_list[[family]][[shape_index]]
-  data_config$y_intercept[[i]] <- y_intercept_list[[shape_index]]
-  if(is.na(data_config$x_y_coef[[i]])) {
-    # data_config$x_y_coef[[i]] <- x_y_list[[family]][[shape_index]]
-    if(family == "symlognormal") {
-      data_config$x_y_coef[[i]] <- x_y_list[[shape_index]] * 0.7
-    }
-    else {
-      data_config$x_y_coef[[i]] <- x_y_list[[shape_index]]
-    }
-  }
+  data_config$y_intercept[[i]] <- y_intercept_vec[shape_index]
 }
 
 data_config$id <- as.numeric(
@@ -277,15 +272,15 @@ data_config$id <- as.numeric(
 ```{r}
 fit_config <- expand.grid(
   fit_family = c(
-    "gaussian",
-    "student",
-    "skew_normal",
-    "generalized_normal",
-    "asym_laplace",
-    "exgaussian", # FPR skewed good. Anything else does not work well at all
-    "gumbel", # FPR skewed ok, wide is too low
-    "logistic", # FPR ok, thin in z1z2 1.9 too low and 2 is too high
-    "symlognormal"
+    # "gaussian",
+    # "student",
+    "skew_normal"#,
+    # "generalized_normal",
+    # "asym_laplace",
+    # "exgaussian", # FPR skewed good. Anything else does not work well at all
+    # "gumbel", # FPR skewed ok, wide is too low
+    # "logistic", # FPR ok, thin in z1z2 1.9 too low and 2 is too high
+    # "symlognormal"
   ),
   fit_link = c(
     "identity"
