@@ -137,7 +137,7 @@ set.seed(SEED)
 options(error = recover) # for easier debugging
 DEBUG <- FALSE # unless you want every single simulation step written to disk
 
-DATASET_N <- 50 # 5-10-ish for calibration, 200 for the final experiment
+DATASET_N <- 5 # 5-10-ish for calibration, 200 for the final experiment
 
 stan_pars <- list(
   backend = "rstan",
@@ -327,11 +327,10 @@ result_df <- full_simulation(
   seed = SEED,
   result_path = RESULT_PATH,
   debug = DEBUG,
-  calibration_mode = TRUE,
-  time_info = TRUE,
+  calibration_mode = FALSE,
+  time_info = FALSE,
   vars_of_interest = VARS_OF_INTEREST,
-  quantiles = QUANTILES,
-  model_compile_dir = "~/Dokumente/simmodels"
+  quantiles = QUANTILES
 )
 
 end_time <- Sys.time()
