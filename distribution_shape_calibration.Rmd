@@ -1,6 +1,7 @@
 ```{r}
 x <- seq(from=-30, to=30, length.out=1000)
 color <- c("black", "blue", "brown", "cyan", "deeppink", "yellow", "green", "red" , "orange")
+
 ```
 
 ```{r}
@@ -15,6 +16,7 @@ lines(x, bayesfam::dlogistic(x, 0, 0.63), type='l', col=color[8])
 lines(x, bayesfam::dsymlognormal(x, 0, 0.7), type='l', col=color[9]) # compromise, shape vs mode
 ```
 ```{r}
+sln_w_par <- c(0, 2)
 plot(x, dnorm(x, 0, 5), type='l', col=color[1],
      ylab='wide', ylim=c(0, 0.2))
 lines(x, brms::dstudent_t(x, 8, 0, 4.8), type='l', col=color[2])
@@ -24,8 +26,15 @@ lines(x, brms::dasym_laplace(x, 0, 2.2, 0.5), type='l', col=color[5]) # compromi
 lines(x, brms::dexgaussian(x, 0, 5, 1), type='l', col=color[6]) # limit for recover seems to be 2/1, so this is more theoretical...
 lines(x, bayesfam::dgumbel_mean(x, 0, 4.5), type='l', col=color[7])
 lines(x, bayesfam::dlogistic(x, 0, 3), type='l', col=color[8])
-lines(x, bayesfam::dsymlognormal(x, 0, 2), type='l', col=color[9]) # compromise, shape vs mode
+d_sln_w <- bayesfam::dsymlognormal(x, sln_w_par[1], sln_w_par[2])
+lines(x, d_sln_w, type='l', col=color[9]) # compromise, shape vs mode
+
+cat("Normal wide 95% Quantile ", qnorm(c(0.025, 0.975), 0, 5), "\n")
+cat("Symlognormal wide 95% Quantile ", bayesfam::inv_symlog(qnorm(c(0.025, 0.975), sln_w_par[1], sln_w_par[2])), "\n")
+
 ```
+
+
 ```{r}
 plot(x, brms::dskew_normal(x, -1.5, 2, 10), type='l', col=color[3], ylab='skewed', ylim=c(0, 0.3))
 lines(x, brms::dasym_laplace(x, -1.5, 0.4, 0.1), type='l', col=color[5]) # a bit too much right skewed, probably still ok
@@ -33,5 +42,8 @@ lines(x, brms::dexgaussian(x, -1.5, 0.5, 3), type='l', col=color[6])
 lines(x, bayesfam::dgumbel_mean(x, -1.5, 1.6), type='l', col=color[7])
 lines(x, bayesfam::dsymlognormal(x+5, 1.5, 0.5), type='l', col=color[9]) # ehem. Wad?
 lines(x, bayesfam::dsymlognormal(x, -1.5, 0.4), type='l', col=color[8]) # Not quite the same (at all)?
+```
+```{r}
+
 ```
 

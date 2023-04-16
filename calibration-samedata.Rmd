@@ -129,7 +129,7 @@ family_filter <- function(table, family_vector, filter_shape) {
 ```{r}
 RESULT_PATH <- NULL #"~/Dokumente/simresults"
 # RESULT_PATH <- "~/Dokumente/simresults"
-NCORES <- 5 # physical cores -1 or less
+NCORES <- 3 # physical cores -1 or less
 # CLUSTER_TYPE <- "FORK" # or PSOCK if you have Windows
 CLUSTER_TYPE <- "PSOCK"
 SEED <- 1339
@@ -221,24 +221,30 @@ z2_y_vec <- c(0.2, 0.2, -0.5)
 z3_x_vec <- c(0.2, 0.2, 0.6)
 x_z4_vec <- c(0.4, 0.15, -0.1)
 y_z4_vec <- c(-0.2, -0.35, -0.45)
-x_y_vec  <- c(-0.35, 1.65, -0.45)
+x_y_list <- list(
+  "gaussian" = c(-0.33, 1.75),
+  "student" = c(-0.45, 1.75),
+  "skew_normal" = c(-0.35, 1.65, -0.45),
+  "generalized_normal" = c(-0.38, 1.8),
+  "asym_laplace" = c(-0.45, 1.65, -0.52),
+  "exgaussian" = c(-0.28, NA, -0.55),
+  "gumbel" = c(NA, 2.2, -0.5),
+  "logistic" = c(-0.4, 0.25),
+  "symlognormal" = c(-0.22, 0.7, -0.16)
+)
+# x_y_vec  <- c(-0.35, 1.65, -0.45)
 
-
-
-# sigma_y is always the same!
 sigma_y_list <- list(
   "gaussian" = c(1, 5),
   "student" = list(c(5, 0.95), c(8, 4.8)),
   "skew_normal" = list(c(1, 0), c(5, 0), c(2, 10)),
   "generalized_normal" = list(c(1.4, 2), c(7, 2)),
   "asym_laplace" = list(c(0.5, 0.5), c(2.2, 0.5), c(0.4, 0.1)),
-  "exgaussian" = list(c(0.9, 0.5), NA, c(0.5, 3)),
+  "exgaussian" = list(c(0.9, 0.5), NA, c(0.5, 3)), # wide form too unstable
   "gumbel" = c(NA, 6, 1.6), # no thin, form (so NA). wide - skewed
-  # also wide is skewed...?
   "logistic" = c(0.63, 0.4),
   "symlognormal" = c(0.7, 2, 0.5)
 )
-# y_intercept is always the same!
 y_intercept_vec <- c(0, 0, -1.5)
 shape_index_lookup <- list("thin" = 1, "wide" = 2, "skewed" = 3)
 
@@ -255,7 +261,7 @@ for (i in seq_len(nrow(data_config))) {
   data_config$y_z4_coef[[i]] <- y_z4_vec[shape_index]
   
   if(is.na(data_config$x_y_coef[[i]])) {
-    data_config$x_y_coef[[i]] <- x_y_vec[shape_index]
+    data_config$x_y_coef[[i]] <- x_y_list[[family]][shape_index]
   }
   
   data_config$sigma_y[[i]] <- sigma_y_list[[family]][[shape_index]]
@@ -272,15 +278,15 @@ data_config$id <- as.numeric(
 ```{r}
 fit_config <- expand.grid(
   fit_family = c(
-    # "gaussian",
-    # "student",
-    "skew_normal"#,
-    # "generalized_normal",
-    # "asym_laplace",
-    # "exgaussian", # FPR skewed good. Anything else does not work well at all
-    # "gumbel", # FPR skewed ok, wide is too low
-    # "logistic", # FPR ok, thin in z1z2 1.9 too low and 2 is too high
-    # "symlognormal"
+    "gaussian",
+    "student",
+    "skew_normal",
+    "generalized_normal",
+    "asym_laplace",
+    "exgaussian",
+    "gumbel",
+    "logistic",
+    "symlognormal"
   ),
   fit_link = c(
     "identity"
