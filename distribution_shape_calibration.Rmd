@@ -36,14 +36,12 @@ cat("Symlognormal wide 95% Quantile ", bayesfam::inv_symlog(qnorm(c(0.025, 0.975
 
 
 ```{r}
+# calibrated with right shift, given gumbel is always right shifted,
+# symlognormal was added after that
 plot(x, brms::dskew_normal(x, -1.5, 2, 10), type='l', col=color[3], ylab='skewed', ylim=c(0, 0.3))
-lines(x, brms::dasym_laplace(x, -1.5, 0.4, 0.1), type='l', col=color[5]) # a bit too much right skewed, probably still ok
+lines(x, brms::dasym_laplace(x, -1.5, 0.4, 0.1), type='l', col=color[5])
 lines(x, brms::dexgaussian(x, -1.5, 0.5, 3), type='l', col=color[6])
 lines(x, bayesfam::dgumbel_mean(x, -1.5, 1.6), type='l', col=color[7])
-lines(x, bayesfam::dsymlognormal(x+5, 1.5, 0.5), type='l', col=color[9]) # ehem. Wad?
 lines(x, bayesfam::dsymlognormal(x, -1.5, 0.4), type='l', col=color[8]) # Not quite the same (at all)?
-```
-```{r}
-
 ```
 
