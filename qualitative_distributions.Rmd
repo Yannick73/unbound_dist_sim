@@ -89,7 +89,7 @@ gumbel_skewed <- c(-1.5, 1.6)
 
 plot(x, dgumbel_mean(x, gumbel_skewed[1], gumbel_skewed[2]), type='l', col=col1,
      ylab='different qualitative gumbel PDFs')
-lines(x, dnorm(x, gumbel_wide[1], gumbel_wide[2]), type='l', col=col2)
+lines(x, dgumbel_mean(x, gumbel_wide[1], gumbel_wide[2]), type='l', col=col2)
 ```
 ```{r}
 logistic_thin <- c(0, 0.63)
@@ -104,7 +104,7 @@ lines(x, dlogistic(x, mu = logistic_wide[1], sigma = logistic_wide[2]),
 ```{r}
 sln_thin <- c(0, 0.7)
 sln_wide <- c(0, 2)
-sln_skewed <- c(-1.5, 0.4)  # mode bigger, mode != 0
+sln_skewed <- c(-0.8, 0.4)  # mode bigger, mode != 0
 
 plot(x, dsymlognormal(x, mu = sln_thin[1], sigma = sln_thin[2]), 
       type = "l", col = col3, ylab='different qualitative symlognormal PDFs')

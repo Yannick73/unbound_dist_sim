@@ -1,12 +1,13 @@
 ```{r}
+library(ggplot2)
 x <- seq(from=-30, to=30, length.out=1000)
 color <- c("black", "blue", "brown", "cyan", "deeppink", "yellow", "green", "red" , "orange")
-
+# knitr::opts_chunk$set(fig.width=unit(18,"cm"), fig.height=unit(4,"cm"))
 ```
 
-```{r}
+```{r, fig.width=8, fig.height=4}
 plot(x, dnorm(x, 0, 1), type='l', col=color[1],
-     ylab='thin', ylim=c(0, 0.55))
+     ylab='thin', ylim=c(0, 0.55), xlab='')
 lines(x, brms::dstudent_t(x, 5, 0, 0.95), type='l', col=color[2])
 lines(x, brms::dskew_normal(x, 0, 1, 0), type='l', col=color[3])
 lines(x, bayesfam::dgeneralized_normal(x, 0, 1.4, 2), type='l', col=color[4])
@@ -15,10 +16,10 @@ lines(x, brms::dexgaussian(x, 0, 0.9, 0.5), type='l', col=color[6])
 lines(x, bayesfam::dlogistic(x, 0, 0.63), type='l', col=color[8])
 lines(x, bayesfam::dsymlognormal(x, 0, 0.7), type='l', col=color[9]) # compromise, shape vs mode
 ```
-```{r}
+```{r, fig.width=8, fig.height=4}
 sln_w_par <- c(0, 2)
 plot(x, dnorm(x, 0, 5), type='l', col=color[1],
-     ylab='wide', ylim=c(0, 0.2))
+     ylab='wide', ylim=c(0, 0.2), xlab='')
 lines(x, brms::dstudent_t(x, 8, 0, 4.8), type='l', col=color[2])
 lines(x, brms::dskew_normal(x, 0, 5, 0), type='l', col=color[3])
 lines(x, bayesfam::dgeneralized_normal(x, 0, 7, 2), type='l', col=color[4])
@@ -29,16 +30,16 @@ lines(x, bayesfam::dlogistic(x, 0, 3), type='l', col=color[8])
 d_sln_w <- bayesfam::dsymlognormal(x, sln_w_par[1], sln_w_par[2])
 lines(x, d_sln_w, type='l', col=color[9]) # compromise, shape vs mode
 
-cat("Normal wide 95% Quantile ", qnorm(c(0.025, 0.975), 0, 5), "\n")
-cat("Symlognormal wide 95% Quantile ", bayesfam::inv_symlog(qnorm(c(0.025, 0.975), sln_w_par[1], sln_w_par[2])), "\n")
+# cat("Normal wide 95% Quantile ", qnorm(c(0.025, 0.975), 0, 5), "\n")
+# cat("Symlognormal wide 95% Quantile ", bayesfam::inv_symlog(qnorm(c(0.025, 0.975), sln_w_par[1], sln_w_par[2])), "\n")
 
 ```
 
 
-```{r}
+```{r, fig.width=8, fig.height=4}
 # calibrated with right shift, given gumbel is always right shifted,
 # symlognormal was added after that
-plot(x, brms::dskew_normal(x, -1.5, 2, 10), type='l', col=color[3], ylab='skewed', ylim=c(0, 0.3))
+plot(x, brms::dskew_normal(x, -1.5, 2, 10), type='l', col=color[3], ylab='skewed', ylim=c(0, 0.3), xlab='')
 lines(x, brms::dasym_laplace(x, -1.5, 0.4, 0.1), type='l', col=color[5])
 lines(x, brms::dexgaussian(x, -1.5, 0.5, 3), type='l', col=color[6])
 lines(x, bayesfam::dgumbel_mean(x, -1.5, 1.6), type='l', col=color[7])
