@@ -24,93 +24,6 @@ library(ggthemes)
 set.seed(1235813)
 ```
 
-```{r}
-plot_dist <- function(dist, bounds, pars, prefix = "d", parnames = NULL,
-                      package = NULL, user_theme = ggthemes::theme_tufte, ...) {
-  `%>%` <- dplyr::`%>%`
-  pos <- -1
-  if (!is.null(package)) {
-    pos <- asNamespace(package)
-  }
-  ddist <- get(paste0(prefix, dist), pos = pos, mode = "function")
-  df <- data.frame(x = seq(bounds[1], bounds[2], 0.001))
-  if (!is.null(parnames)) {
-    parnames <- paste0(parnames, " = ")
-  }
-  cnames <- rep(NA, length(pars))
-  for (i in seq_along(pars)) {
-    tmp <- do.call(ddist, c(list(df$x), pars[[i]], list(...)))
-    cnames[i] <- paste0("$", parnames, pars[[i]], "$", collapse = ", ")
-    df[paste0(parnames, pars[[i]], collapse = ", ")] <- tmp
-  }
-  df <- df %>%
-    tidyr::gather("pars", "dens", -x) %>%
-    dplyr::mutate(pars = factor(pars, unique(pars)))
-  gg <- ggplot2::ggplot(df, ggplot2::aes(x, dens, color = pars)) +
-    user_theme() +
-    ggplot2::geom_line(size = 1) +
-    ggplot2::scale_color_viridis_d(labels = unname(latex2exp::TeX(cnames))) +
-    ggplot2::labs(x = "x", y = "", color = "") +
-    ggplot2::theme(
-      axis.text.y = ggplot2::element_blank(),
-      axis.ticks.y = ggplot2::element_blank(),
-      axis.line.y = ggplot2::element_blank(),
-      legend.position = "bottom",
-      legend.text = ggplot2::element_text(size = 10)
-    )
-  if (prefix == "p") {
-    gg <- gg +
-      ggplot2::scale_y_continuous(breaks = c(0, 0.5, 1)) +
-      ggplot2::theme(
-        axis.ticks.y = ggplot2::element_line(),
-        axis.text.y = ggplot2::element_text(),
-        axis.line.y = ggplot2::element_line()
-      )
-  } else if (prefix == "q") {
-    gg <- gg +
-      ggplot2::scale_y_continuous() +
-      ggplot2::theme(
-        axis.ticks.y = ggplot2::element_line(),
-        axis.text.y = ggplot2::element_text(),
-        axis.line.y = ggplot2::element_line()
-      )
-  }
-  return(gg)
-}
-```
-
-# Likelihoods
-
-## Gamma
-
-<!-- ```{r} -->
-<!-- p1 <- plot_dist( -->
-<!--   dist = "gamma_mean", -->
-<!--   bounds = c(0.00001, 20), -->
-<!--   parnames = c("mu", "a"), -->
-<!--   package = "bayesim", -->
-<!--   pars = list( -->
-<!--     c(1, 1), -->
-<!--     c(10, 10), -->
-<!--     c(10, 40) -->
-<!--     ), -->
-<!--   user_theme = partial(theme_tufte, base_family = "") -->
-<!--   ) + -->
-<!--   ggtitle("Gamma") + -->
-<!--   guides(color = "none") + -->
-<!--   coord_cartesian(ylim = c(0, 0.4)) + -->
-<!--   geom_vline(xintercept = 0, linetype = "dotted", color = "grey") -->
-<!-- p1 -->
-<!-- ``` -->
-
-
-<!-- ## Combined -->
-
-<!-- ```{r} -->
-<!-- (((p1 + p2)/(p5 + p6)/(p7 + p8) /(p3 + p4)) ) + theme(text=element_text(size=12)) -->
-<!-- ggsave("~/Pictures/dist_overvoew.png", width = 210, height = (297/4)*2.2, units = "mm", dpi = 300) -->
-<!-- ``` -->
-
 # filter-helper
 
 ```{r}
@@ -127,17 +40,17 @@ family_filter <- function(table, family_vector, filter_shape) {
 # Sim Setup
 
 ```{r}
-RESULT_PATH <- NULL #"~/Dokumente/simresults"
-# RESULT_PATH <- "~/Dokumente/simresults"
+# RESULT_PATH <- NULL
+# RESULT_PATH <- "~/Dokumente/simresults_N200_paper"
+RESULT_PATH <- "results_N200/simresults_N200_paper"
 NCORES <- 3 # physical cores -1 or less
-# CLUSTER_TYPE <- "FORK" # or PSOCK if you have Windows
 CLUSTER_TYPE <- "PSOCK"
 SEED <- 1339
 set.seed(SEED)
 options(error = recover) # for easier debugging
 DEBUG <- FALSE # unless you want every single simulation step written to disk
 
-DATASET_N <- 5 # 5-10-ish for calibration, 200 for the final experiment
+DATASET_N <- 200 # 5-10-ish for calibration, 200 for the final experiment
 
 stan_pars <- list(
   backend = "rstan",
@@ -232,7 +145,6 @@ x_y_list <- list(
   "logistic" = c(-0.4, 0.25),
   "symlognormal" = c(-0.22, 0.7, -0.16)
 )
-# x_y_vec  <- c(-0.35, 1.65, -0.45)
 
 sigma_y_list <- list(
   "gaussian" = c(1, 5),
@@ -302,14 +214,6 @@ fit_config <- expand.grid(
 )
 
 fit_config$prior = c() # should stay empty for this
-
-# for (i in seq_len(nrow(fit_config_ideal))) {
-#   family <- fit_config_ideal$fit_family[[i]]
-#   if(family == "exgaussian") {
-#     #fit_config_ideal$prior[[i]] <- brms::set_prior("flat(0.001, 10)", class = "b", coef = "x")
-#     print("set exgauss prior manually")
-#   }
-# }
 ```
 
 # Simulation
@@ -327,10 +231,11 @@ result_df <- full_simulation(
   seed = SEED,
   result_path = RESULT_PATH,
   debug = DEBUG,
-  calibration_mode = FALSE,
-  time_info = FALSE,
+  calibration_mode = TRUE,
+  time_info = TRUE,
   vars_of_interest = VARS_OF_INTEREST,
-  quantiles = QUANTILES
+  quantiles = QUANTILES,
+  model_compile_dir = "~/Dokumente/simmodels"
 )
 
 end_time <- Sys.time()
@@ -349,7 +254,6 @@ p1 <- result_df %>%
   mutate(sig95 = as.numeric(b_x_2_5pq > 0 | b_x_97_5pq < 0),
          zero_effect = ifelse(x_y_coef == 0, "FPR", "TPR")) %>%
   group_by(across(all_of(cols))) %>%
-  #summarise(sig95 = mean(1 - sig95)) %>%
   summarise(sig95 = mean(sig95)) %>%
   ggplot() +
   geom_bar(aes(data_family, x = sig95), stat = "identity") +
@@ -362,7 +266,80 @@ p1 <- result_df %>%
 
 p1
 ```
+```{r}
+p_thin <- result_df %>%
+  filter(data_family == fit_family) %>%
+  filter(shape == "thin") %>%
+  filter(divergent_transitions_rel == 0) %>%
+  filter(rhat_b_x <= 1.01) %>%
+  filter(ess_bulk_b_x > 400) %>%
+  filter(ess_tail_b_x > 400) %>%
+  mutate(sig95 = as.numeric(b_x_2_5pq > 0 | b_x_97_5pq < 0),
+         zero_effect = ifelse(x_y_coef == 0, "FPR", "TPR")) %>%
+  group_by(across(all_of(cols))) %>%
+  summarise(sig95 = mean(sig95)) %>%
+  ggplot() +
+  geom_bar(aes(data_family, x = sig95), stat = "identity") +
+  geom_vline(xintercept = 0.05) +
+  geom_vline(xintercept = 0.95) +
+  facet_grid(zero_effect + shape ~ formula) +
+  ggtitle("95% CI coverage of true x_y_coef on thin shaped distributions") +
+  ylab("Likelihoods") +
+  xlab("CI Calibration")
 
+p_thin
+ggsave("~/Bilder/Unbound-Paper-Images/cal_thin.png", width = 230, height = (297/4)*1.2, units = "mm", dpi = 300)
+```
+```{r}
+p_wide <- result_df %>%
+  filter(data_family == fit_family) %>%
+  filter(shape == "wide") %>%
+  filter(divergent_transitions_rel == 0) %>%
+  filter(rhat_b_x <= 1.01) %>%
+  filter(ess_bulk_b_x > 400) %>%
+  filter(ess_tail_b_x > 400) %>%
+  mutate(sig95 = as.numeric(b_x_2_5pq > 0 | b_x_97_5pq < 0),
+         zero_effect = ifelse(x_y_coef == 0, "FPR", "TPR")) %>%
+  group_by(across(all_of(cols))) %>%
+  summarise(sig95 = mean(sig95)) %>%
+  ggplot() +
+  geom_bar(aes(data_family, x = sig95), stat = "identity") +
+  geom_vline(xintercept = 0.05) +
+  geom_vline(xintercept = 0.95) +
+  facet_grid(zero_effect + shape ~ formula) +
+  ggtitle("95% CI coverage of true x_y_coef on wide shaped distributions") +
+  ylab("Likelihoods") +
+  xlab("CI Calibration")
+
+p_wide
+ggsave("~/Bilder/Unbound-Paper-Images/cal_wide.png", width = 230, height = (297/4)*1.2, units = "mm", dpi = 300)
+```
+
+```{r}
+p_skewed <- result_df %>%
+  filter(data_family == fit_family) %>%
+  filter(shape == "skewed") %>%
+  filter(divergent_transitions_rel == 0) %>%
+  filter(rhat_b_x <= 1.01) %>%
+  filter(ess_bulk_b_x > 400) %>%
+  filter(ess_tail_b_x > 400) %>%
+  mutate(sig95 = as.numeric(b_x_2_5pq > 0 | b_x_97_5pq < 0),
+         zero_effect = ifelse(x_y_coef == 0, "FPR", "TPR")) %>%
+  group_by(across(all_of(cols))) %>%
+  summarise(sig95 = mean(sig95)) %>%
+  ggplot() +
+  geom_bar(aes(data_family, x = sig95), stat = "identity") +
+  geom_vline(xintercept = 0.05) +
+  geom_vline(xintercept = 0.95) +
+  facet_grid(zero_effect + shape ~ formula) +
+  ggtitle("95% CI coverage of true x_y_coef on skewed shaped distributions") +
+  ylab("Likelihoods") +
+  xlab("CI Calibration")
+
+p_skewed
+ggsave("~/Bilder/Unbound-Paper-Images/cal_skewed.png", width = 230, height = (297/4)*1, units = "mm", dpi = 300)
+
+```
 Explanation:
 - If the true effect (x_y_coef) = 0, having no 0 in the CI (sig95) is a false positive (or alpha error)
 - If the true effect (x_y_coef) != 0, having no 0 in the CI (sig95) is a true positive (or power)
